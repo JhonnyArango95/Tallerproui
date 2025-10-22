@@ -8,6 +8,11 @@ import { Checkbox } from './components/ui/checkbox';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './components/ui/dialog';
 import { BrandLogos } from './components/BrandLogos';
 
+// --- Constantes de la API ---
+// Es una mejor práctica definir esto fuera del componente.
+const API_TOKEN = 'c16e2bb53733fbfef5a0a9f69fde50c70410a13a0363accb46404b06083e1391';
+const API_BASE_URL = 'https://apiperu.dev/api/dni';
+
 export default function App() {
   const [formData, setFormData] = useState({
     documentType: 'DNI',
@@ -29,74 +34,76 @@ export default function App() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Función para consultar la API de RENIEC
-  const fetchDNIData = async (dni: string) => {
-    setIsLoadingDNI(true);
-    setDniError(null);
+  const fetchDNIData = async (dni: string) => {
+    setIsLoadingDNI(true);
+    setDniError(null);
+    setDataFromAPI(false); // Resetea el estado en cada nueva consulta
 
-    try {
-      // Implementación API
-      // URL: https://api.decolecta.com/v1/reniec/dni?numero=${dni}
-      
-      // Simulamos la llamada a la API con un delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Base de datos mock para demostración
-      const mockDatabase: Record<string, any> = {
-        '46027897': {
-          first_name: 'ROXANA KARINA',
-          first_last_name: 'DELGADO',
-          second_last_name: 'CUELLAR',
-          full_name: 'DELGADO CUELLAR ROXANA KARINA',
-          document_number: '46027897'
+    try {
+      // 1. Construir la URL de la API
+      const url = `${API_BASE_URL}/${dni}?api_token=${API_TOKEN}`;
+
+      // 2. Realizar la llamada a la API con fetch
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        '12345678': {
-          first_name: 'JUAN CARLOS',
-          first_last_name: 'PÉREZ',
-          second_last_name: 'GARCÍA',
-          full_name: 'PÉREZ GARCÍA JUAN CARLOS',
-          document_number: '12345678'
-        },
-        '87654321': {
-          first_name: 'MARÍA ELENA',
-          first_last_name: 'RODRIGUEZ',
-          second_last_name: 'LOPEZ',
-          full_name: 'RODRIGUEZ LOPEZ MARÍA ELENA',
-          document_number: '87654321'
-        }
-      };
-
-      const data = mockDatabase[dni];
-
-      if (!data) {
-        throw new Error('DNI no encontrado en la base de datos');
-      }
-
-      // Actualizar el formulario con los datos obtenidos
-      setFormData((prev) => ({
-        ...prev,
-        firstName: data.first_name,
-        lastName: `${data.first_last_name} ${data.second_last_name}`,
-      }));
-      
-      // Marcar que los datos provienen de la API
-      setDataFromAPI(true);
-      
-      // Limpiar errores de validación de nombre y apellido
-      setValidationErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors.firstName;
-        delete newErrors.lastName;
-        delete newErrors.documentNumber;
-        return newErrors;
       });
-    } catch (error) {
-      setDniError(error instanceof Error ? error.message : 'Error al consultar DNI');
-      setDataFromAPI(false);
-      console.error('Error completo:', error);
-    } finally {
-      setIsLoadingDNI(false);
-    }
-  };
+
+      // 3. Verificar si la respuesta de red es exitosa
+      if (!response.ok) {
+        throw new Error(`Error de red: ${response.status} ${response.statusText}`);
+      }
+
+      // 4. Parsear la respuesta JSON
+      const result = await response.json();
+
+      // 5. Verificar si la API indica éxito (basado en tu JSON de ejemplo)
+      if (!result.success || !result.data) {
+        throw new Error(result.message || 'DNI no encontrado o error en la API');
+      }
+      
+      // 6. Extraer los datos del DNI
+      const apiData = result.data;
+
+      // 7. Actualizar el formulario con los datos obtenidos de la API
+      setFormData((prev) => ({
+        ...prev,
+        // Usamos los campos de la API: "nombres" y "apellido_paterno", "apellido_materno"
+        firstName: apiData.nombres || '',
+        lastName: `${apiData.apellido_paterno || ''} ${apiData.apellido_materno || ''}`.trim(),
+      }));
+      
+      // 8. Marcar que los datos provienen de la API
+      setDataFromAPI(true);
+      
+      // 9. Limpiar errores de validación de nombre y apellido
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.firstName;
+        delete newErrors.lastName;
+        delete newErrors.documentNumber;
+        return newErrors;
+      });
+
+    } catch (error) {
+      // 10. Manejar cualquier error
+      setDniError(error instanceof Error ? error.message : 'Error al consultar DNI');
+      setDataFromAPI(false);
+      // Limpiar campos si la consulta falla
+      setFormData((prev) => ({
+        ...prev,
+        firstName: '',
+        lastName: '',
+      }));
+      console.error('Error completo:', error);
+    } finally {
+      // 11. Indicar que la carga ha terminado
+      setIsLoadingDNI(false);
+    }
+  };
 
   // Efecto para consultar la API cuando el DNI tenga 8 dígitos
   useEffect(() => {
