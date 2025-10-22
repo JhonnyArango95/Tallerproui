@@ -34,9 +34,8 @@ export default function App() {
     setDniError(null);
 
     try {
-      // NOTA: Implementación temporal con datos mock debido a restricciones CORS
-      // Para usar la API real, necesitas un backend/proxy que haga la petición
-      // URL real: https://api.decolecta.com/v1/reniec/dni?numero=${dni}
+      // Implementación API
+      // URL: https://api.decolecta.com/v1/reniec/dni?numero=${dni}
       
       // Simulamos la llamada a la API con un delay
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -478,36 +477,6 @@ export default function App() {
           </div>
         </div>
       </div>
-
-      {/* Modal para el siguiente paso */}
-      <Dialog open={showNextStep} onOpenChange={setShowNextStep}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">2. Ingresar Auto</DialogTitle>
-          </DialogHeader>
-          <div className="py-8">
-            <p className="text-gray-600 mb-4">
-              ¡Datos validados correctamente! Aquí continuarías con el siguiente paso del formulario.
-            </p>
-            <div className="bg-[#f8f8f8] p-6 rounded-lg space-y-2">
-              <h3 className="text-[#c17a2e] mb-2">Resumen de tus datos:</h3>
-              <p><span className="text-[#c17a2e]">Documento:</span> {formData.documentType} - {formData.documentNumber}</p>
-              <p><span className="text-[#c17a2e]">Nombre:</span> {formData.firstName}</p>
-              <p><span className="text-[#c17a2e]">Apellido:</span> {formData.lastName}</p>
-              <p><span className="text-[#c17a2e]">Correo:</span> {formData.email}</p>
-              <p><span className="text-[#c17a2e]">Celular:</span> {formData.phone}</p>
-            </div>
-            <div className="mt-6 flex gap-4">
-              <Button className="bg-[#f59e0b] hover:bg-[#d97706]">
-                Continuar con datos del auto
-              </Button>
-              <Button variant="outline" onClick={() => setShowNextStep(false)}>
-                Volver a editar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
