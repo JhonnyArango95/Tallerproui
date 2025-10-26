@@ -1,0 +1,175 @@
+import { useState } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Wrench, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+interface LoginScreenProps {
+  onLoginSuccess: (user: any) => void;
+}
+
+export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: '',
+  });
+
+  const [showError, setShowError] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Credenciales mock
+  const MOCK_CREDENTIALS = {
+    email: 'tallerpro.com',
+    password: '********',
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowError(false);
+    setShowSuccess(false);
+    setIsLoading(true);
+
+    // Simular petición al servidor
+    setTimeout(() => {
+      if (
+        credentials.email === MOCK_CREDENTIALS.email &&
+        credentials.password === MOCK_CREDENTIALS.password
+      ) {
+        setShowSuccess(true);
+        setTimeout(() => {
+          onLoginSuccess({
+            name: 'Maria Gómez',
+            email: credentials.email,
+            role: 'Administrador',
+          });
+        }, 1500);
+      } else {
+        setShowError(true);
+        setIsLoading(false);
+      }
+    }, 800);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#4a5568] flex items-center justify-center p-4 relative">
+      {/* Success Message - Top Center Banner */}
+      {showSuccess && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 animate-in slide-in-from-top">
+          <div className="bg-[#22c55e] text-white px-6 py-4 rounded-lg shadow-lg">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Bienvenido de nuevo</p>
+                <p className="text-sm">Tu autenticación fue exitosa y tu sesión está activa.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Message - Top Center Banner */}
+      {showError && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 animate-in slide-in-from-top">
+          <div className="bg-[#ef4444] text-white px-6 py-4 rounded-lg shadow-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">Credenciales incorrectas</p>
+                <p className="text-sm">Verifica tu correo y contraseña e inténtalo nuevamente.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login Card */}
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 bg-[#1e293b] rounded flex items-center justify-center">
+              <Wrench className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-gray-900">TallerPro</h1>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Acceso seguro</span>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            Panel diseñado para administrar los datos, ver el estado del servicio o la solicitud.
+          </p>
+        </div>
+
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="space-y-6">
+          {/* Email Field */}
+          <div>
+            <Label htmlFor="email" className="text-gray-700 mb-2 block">
+              Correo electrónico
+            </Label>
+            <Input
+              id="email"
+              type="text"
+              value={credentials.email}
+              onChange={(e) => {
+                setCredentials({ ...credentials, email: e.target.value });
+                setShowError(false);
+              }}
+              className="bg-white border-gray-300"
+              placeholder="tallerpro.com"
+              required
+            />
+          </div>
+
+          {/* Password Field */}
+          <div>
+            <Label htmlFor="password" className="text-gray-700 mb-2 block">
+              Contraseña
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              value={credentials.password}
+              onChange={(e) => {
+                setCredentials({ ...credentials, password: e.target.value });
+                setShowError(false);
+              }}
+              className="bg-white border-gray-300"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          {/* Links */}
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center gap-2 text-gray-600">
+              <input type="checkbox" className="rounded border-gray-300" />
+              Recordarme
+            </label>
+            <a href="#" className="text-blue-600 hover:text-blue-700 underline">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Verificando...' : 'Entrar'}
+          </Button>
+
+          {/* Help Link */}
+          <div className="text-center">
+            <a href="#" className="text-sm text-gray-500 hover:text-gray-700 inline-flex items-center gap-1">
+              <AlertCircle className="w-4 h-4" />
+              Ayuda
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
