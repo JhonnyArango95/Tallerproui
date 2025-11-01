@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { UserManagement } from './UserManagement';
 import { ServiceManagement } from './ServiceManagement';
+import { AppointmentManagement } from './AppointmentManagement';
 
 interface AdminDashboardProps {
   user: {
@@ -21,13 +22,12 @@ interface AdminDashboardProps {
   onLogout: () => void;
 }
 
-type MenuItem = 'dashboard' | 'citas' | 'tecnicos' | 'servicios' | 'reportes' | 'usuarios';
+type MenuItem = 'citas' | 'tecnicos' | 'servicios' | 'reportes' | 'usuarios';
 
 export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
-  const [activeMenu, setActiveMenu] = useState<MenuItem>('usuarios');
+  const [activeMenu, setActiveMenu] = useState<MenuItem>('citas');
 
   const menuItems = [
-    { id: 'dashboard' as MenuItem, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'citas' as MenuItem, label: 'Citas', icon: Calendar },
     { id: 'tecnicos' as MenuItem, label: 'Técnicos', icon: Wrench },
     { id: 'servicios' as MenuItem, label: 'Servicios', icon: Settings },
@@ -117,7 +117,6 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
               <span className="text-sm text-gray-600">
                 {activeMenu === 'usuarios' && 'Gestión de usuarios'}
                 {activeMenu === 'servicios' && 'Gestión de servicios'}
-                {activeMenu === 'dashboard' && 'Panel principal'}
                 {activeMenu === 'citas' && 'Gestión de citas'}
                 {activeMenu === 'tecnicos' && 'Gestión de técnicos'}
                 {activeMenu === 'reportes' && 'Reportes y estadísticas'}
@@ -125,7 +124,6 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
               <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                 {activeMenu === 'usuarios' && <Users className="w-5 h-5 text-gray-600" />}
                 {activeMenu === 'servicios' && <Settings className="w-5 h-5 text-gray-600" />}
-                {activeMenu === 'dashboard' && <LayoutDashboard className="w-5 h-5 text-gray-600" />}
                 {activeMenu === 'citas' && <Calendar className="w-5 h-5 text-gray-600" />}
                 {activeMenu === 'tecnicos' && <Wrench className="w-5 h-5 text-gray-600" />}
                 {activeMenu === 'reportes' && <FileText className="w-5 h-5 text-gray-600" />}
@@ -138,20 +136,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         <div className="flex-1 overflow-auto p-8">
           {activeMenu === 'usuarios' && <UserManagement />}
           {activeMenu === 'servicios' && <ServiceManagement />}
-          {activeMenu === 'dashboard' && (
-            <div className="text-center py-20">
-              <LayoutDashboard className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-gray-900 mb-2">Dashboard</h3>
-              <p className="text-gray-600">Contenido del dashboard en desarrollo</p>
-            </div>
-          )}
-          {activeMenu === 'citas' && (
-            <div className="text-center py-20">
-              <Calendar className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-gray-900 mb-2">Citas</h3>
-              <p className="text-gray-600">Gestión de citas en desarrollo</p>
-            </div>
-          )}
+          {activeMenu === 'citas' && <AppointmentManagement />}
           {activeMenu === 'tecnicos' && (
             <div className="text-center py-20">
               <Wrench className="w-16 h-16 mx-auto text-gray-400 mb-4" />

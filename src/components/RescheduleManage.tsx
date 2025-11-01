@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { AlertCircle } from 'lucide-react';
+import { CancelAppointmentConfirmation } from './CancelAppointmentConfirmation';
 
 interface RescheduleManageProps {
   onBack: () => void;
@@ -23,20 +25,26 @@ export function RescheduleManage({
   onNewSearch,
   appointmentData,
 }: RescheduleManageProps) {
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
   const handleReschedule = () => {
     console.log('Reagendando cita:', appointmentData);
     onReschedule();
   };
 
-  const handleCancel = () => {
-    const confirmCancel = window.confirm(
-      '¿Estás seguro que deseas anular esta cita?\n\nEsta acción no se puede deshacer.'
-    );
-    
-    if (confirmCancel) {
-      console.log('Anulando cita:', appointmentData);
-      onCancel();
-    }
+  const handleCancelClick = () => {
+    setShowCancelModal(true);
+  };
+
+  const handleCancelConfirm = () => {
+    console.log('Anulando cita:', appointmentData);
+    setShowCancelModal(false);
+    onCancel();
+  };
+
+  const handleCancelModalReschedule = () => {
+    setShowCancelModal(false);
+    handleReschedule();
   };
 
   return (
@@ -109,7 +117,7 @@ export function RescheduleManage({
                 </Button>
 
                 <Button
-                  onClick={handleCancel}
+                  onClick={handleCancelClick}
                   variant="outline"
                   className="w-full border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
                 >
@@ -133,6 +141,19 @@ export function RescheduleManage({
           </div>
         </div>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <CancelAppointmentConfirmation
+          onConfirm={handleCancelConfirm}
+          onReschedule={handleCancelModalReschedule}
+          appointmentData={{
+            location: appointmentData.location,
+            date: appointmentData.date,
+            plate: appointmentData.plate,
+          }}
+        />
+      )}
     </div>
   );
 }

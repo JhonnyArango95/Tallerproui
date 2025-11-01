@@ -10,6 +10,8 @@ import { VehicleAppointment } from './components/VehicleAppointment';
 import { ConfirmationScreen } from './components/ConfirmationScreen';
 import { RescheduleSearch } from './components/RescheduleSearch';
 import { RescheduleManage } from './components/RescheduleManage';
+import { RescheduleAppointment } from './components/RescheduleAppointment';
+import { SuccessScreen } from './components/SuccessScreen';
 import { LoginScreen } from './components/admin/LoginScreen';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 
@@ -45,7 +47,11 @@ export default function App() {
   // Estados para el flujo de reagendamiento
   const [showRescheduleSearch, setShowRescheduleSearch] = useState(false);
   const [showRescheduleManage, setShowRescheduleManage] = useState(false);
+  const [showRescheduleAppointment, setShowRescheduleAppointment] = useState(false);
+  const [showRescheduleSuccess, setShowRescheduleSuccess] = useState(false);
   const [foundAppointment, setFoundAppointment] = useState<any>(null);
+  const [successType, setSuccessType] = useState<'reschedule' | 'cancel'>('reschedule');
+  const [successDetails, setSuccessDetails] = useState<any>({});
 
   // Estados para el panel de administración
   const [showAdminLogin, setShowAdminLogin] = useState(false);
@@ -181,6 +187,8 @@ export default function App() {
     setShowNextStep(false);
     setShowRescheduleSearch(false);
     setShowRescheduleManage(false);
+    setShowRescheduleAppointment(false);
+    setShowRescheduleSuccess(false);
     setFormData({
       documentType: 'DNI',
       documentNumber: '',
@@ -194,6 +202,7 @@ export default function App() {
     setVehicleData(null);
     setAppointmentData(null);
     setFoundAppointment(null);
+    setSuccessDetails({});
   };
 
   const handleRescheduleClick = () => {
@@ -208,25 +217,54 @@ export default function App() {
   const handleBackFromReschedule = () => {
     setShowRescheduleSearch(false);
     setShowRescheduleManage(false);
+    setShowRescheduleAppointment(false);
     setFoundAppointment(null);
   };
 
   const handleNewSearch = () => {
     setShowRescheduleManage(false);
+    setShowRescheduleAppointment(false);
     setFoundAppointment(null);
   };
 
   const handleRescheduleAppointment = () => {
-    // Aquí iríamos a la pantalla de selección de nueva fecha
-    // Por ahora mostramos un mensaje
-    alert('Funcionalidad de reagendar: Aquí se mostraría el calendario para seleccionar nueva fecha y hora.');
-    console.log('Reagendando cita para:', foundAppointment);
+    // Mostrar la pantalla de selección de calendario
+    setShowRescheduleManage(false);
+    setShowRescheduleAppointment(true);
+  };
+
+  const handleConfirmReschedule = (newDate: string, newTime: string) => {
+    // Guardar detalles para la pantalla de éxito
+    setSuccessType('reschedule');
+    setSuccessDetails({
+      date: `${newDate} a las ${newTime}`,
+      location: foundAppointment?.location || 'Taller Central',
+    });
+    setShowRescheduleAppointment(false);
+    setShowRescheduleSuccess(true);
+    console.log('Cita reagendada para:', newDate, newTime);
   };
 
   const handleCancelAppointment = () => {
-    // Después de cancelar, volver al home
-    alert('Cita anulada exitosamente');
-    handleBackToHome();
+    // Guardar detalles para la pantalla de éxito
+    setSuccessType('cancel');
+    setSuccessDetails({
+      date: foundAppointment?.date || '',
+      location: foundAppointment?.location || 'Taller Central',
+    });
+    setShowRescheduleManage(false);
+    setShowRescheduleSuccess(true);
+  };
+
+  const handleCancelFromRescheduleScreen = () => {
+    // Mostrar modal de confirmación desde la pantalla de reagendamiento
+    setSuccessType('cancel');
+    setSuccessDetails({
+      date: foundAppointment?.date || '',
+      location: foundAppointment?.location || 'Taller Central',
+    });
+    setShowRescheduleAppointment(false);
+    setShowRescheduleSuccess(true);
   };
 
   const handleAdminAccess = () => {
@@ -253,6 +291,30 @@ export default function App() {
   // Si showAdminLogin es true, mostrar la pantalla de login
   if (showAdminLogin) {
     return <LoginScreen onLoginSuccess={handleAdminLoginSuccess} />;
+  }
+
+  // Si showRescheduleSuccess es true, mostrar la pantalla de éxito
+  if (showRescheduleSuccess) {
+    return (
+      <SuccessScreen
+        onBackToHome={handleBackToHome}
+        type={successType}
+        details={successDetails}
+      />
+    );
+  }
+
+  // Si showRescheduleAppointment es true, mostrar la pantalla de calendario
+  if (showRescheduleAppointment && foundAppointment) {
+    return (
+      <RescheduleAppointment
+        onBack={handleBackFromReschedule}
+        onConfirm={handleConfirmReschedule}
+        onCancel={handleCancelFromRescheduleScreen}
+        onNewSearch={handleNewSearch}
+        appointmentData={foundAppointment}
+      />
+    );
   }
 
   // Si showRescheduleManage es true, mostrar la pantalla de gestión de cita
@@ -321,7 +383,7 @@ export default function App() {
       {/* Header */}
       <div className="bg-[#1e293b] text-white py-6 px-8">
         <div className="max-w-7xl mx-auto relative">
-          <h1 className="text-center">Ingresa tus datos</h1>
+          <h1 className="text-center">1 Ingresa tus datos</h1>
           <button
             onClick={handleAdminAccess}
             className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-2 px-4 py-2 rounded bg-[#2d3b4f] hover:bg-[#3d4b5f] transition-colors text-sm"
