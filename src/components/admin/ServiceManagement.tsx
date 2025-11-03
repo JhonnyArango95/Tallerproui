@@ -240,7 +240,7 @@ export function ServiceManagement() {
               type="text"
               value={formData.price}
               onChange={(e) => handleInputChange('price', e.target.value)}
-              placeholder="Ej. $45.00"
+              placeholder="Ej. S/. 45.00"
               className="bg-white"
             />
           </div>

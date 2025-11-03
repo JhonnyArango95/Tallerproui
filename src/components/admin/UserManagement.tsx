@@ -23,7 +23,7 @@ export function UserManagement() {
       id: 1,
       firstName: 'Ana',
       lastName: 'García',
-      email: 'ana@example.com',
+      email: 'ana@autotaller.com',
       phone: '',
       role: 'administrador',
       status: 'activo',
@@ -32,7 +32,7 @@ export function UserManagement() {
       id: 2,
       firstName: 'Luis',
       lastName: 'Pérez',
-      email: 'luis@empresa.com',
+      email: 'luis@autotaller.com',
       phone: '',
       role: 'activo',
       status: 'inactivo',
@@ -41,7 +41,7 @@ export function UserManagement() {
       id: 3,
       firstName: 'María',
       lastName: 'Ríos',
-      email: 'maria@empresa.com',
+      email: 'maria@autotaller.com',
       phone: '',
       role: '',
       status: '',
@@ -95,7 +95,7 @@ export function UserManagement() {
 
   const handleSubmit = () => {
     // Validación básica
-    if (!formData.firstName || !formData.lastName || !formData.email) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.role || !formData.administrator || !formData.password || !formData.confirmPassword) {
       alert('Por favor completa los campos obligatorios');
       return;
     }
@@ -242,7 +242,7 @@ export function UserManagement() {
             <Input
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="+34 812 345 678"
+              placeholder="+51 912 345 678"
               className="bg-white"
             />
           </div>
@@ -252,7 +252,7 @@ export function UserManagement() {
             <Label className="text-gray-700 mb-2 block">Rol</Label>
             <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
               <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Estado" />
+                <SelectValue placeholder="Administrador" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="administrador">Administrador</SelectItem>
@@ -264,7 +264,7 @@ export function UserManagement() {
 
           {/* Administrador (Estado) */}
           <div>
-            <Label className="text-gray-700 mb-2 block">Administrador</Label>
+            <Label className="text-gray-700 mb-2 block">Estado</Label>
             <Select
               value={formData.administrator}
               onValueChange={(value) => handleInputChange('administrator', value)}
