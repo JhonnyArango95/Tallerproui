@@ -334,7 +334,7 @@ export function UserManagement() {
             <Input
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="+34 812 345 678"
+              placeholder="+51 912 345 678"
               className="bg-white"
             />
           </div>
@@ -344,7 +344,7 @@ export function UserManagement() {
             <Label className="text-gray-700 mb-2 block">Rol</Label>
             <Select value={formData.role} onValueChange={(value) => handleInputChange('role', value)}>
               <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Estado" />
+                <SelectValue placeholder="Administrador" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="administrador">Administrador</SelectItem>
@@ -356,7 +356,7 @@ export function UserManagement() {
 
           {/* CAMPO: Administrador (Estado: Activo/Inactivo) */}
           <div>
-            <Label className="text-gray-700 mb-2 block">Administrador</Label>
+            <Label className="text-gray-700 mb-2 block">Estado</Label>
             <Select
               value={formData.administrator}
               onValueChange={(value) => handleInputChange('administrator', value)}

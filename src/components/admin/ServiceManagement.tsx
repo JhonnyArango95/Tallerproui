@@ -75,6 +75,17 @@ export function ServiceManagement() {
       warranty: '6 meses / 10,000 km',
       enabled: 'activo',
     },
+        {
+      id: 4,
+      name: 'Servicio de caja mecanica',
+      category: 'General / Frenos / Motor / Eléctrico',
+      price: '180.00',
+      estimatedDuration: '3h',
+      description: 'Cambio de caja mecanica',
+      requirements: 'Cajate mecanica',
+      warranty: '8 meses / 15,000 km',
+      enabled: 'activo',
+    },
   ]);
 
   /* ============================================
