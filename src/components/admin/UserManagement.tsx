@@ -61,7 +61,9 @@ export function UserManagement() {
   });
 
   const [searchTerm, setSearchTerm] = useState('');
+  //Guarda el valor seleccionado en el filtro de "Rol"
   const [filterRole, setFilterRole] = useState('todos');
+  //Guarda el valor del filtro de "Estado"
   const [filterStatus, setFilterStatus] = useState('todos');
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
 

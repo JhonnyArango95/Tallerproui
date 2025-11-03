@@ -789,7 +789,7 @@ export function AppointmentManagement() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <div className="flex items-center justify-between pb-3 border-b">
               <div className="flex items-center gap-2">
@@ -807,7 +807,7 @@ export function AppointmentManagement() {
           </DialogHeader>
 
           {editingAppointment && (
-            <div className="grid grid-cols-2 gap-6 overflow-auto flex-1 py-4">
+            <div className="grid grid-cols-2 gap-6 overflow-auto flex-1 py-4 px-1">
               {/* Left side - Form */}
               <div className="space-y-4">
                 {/* Cliente */}
@@ -952,6 +952,19 @@ export function AppointmentManagement() {
                   <p className="text-xs text-gray-500 mt-1.5">
                     Selecciona técnico y bahía disponibles.
                   </p>
+                </div>
+
+                {/* Notas internas */}
+                <div>
+                  <Label className="text-gray-700 mb-1.5 block text-sm">Notas internas</Label>
+                  <Textarea
+                    value={editingAppointment.notes}
+                    onChange={(e) =>
+                      setEditingAppointment({ ...editingAppointment, notes: e.target.value })
+                    }
+                    placeholder="Describe el problema, síntomas o instrucciones adicionales."
+                    className="bg-white min-h-20 resize-none"
+                  />
                 </div>
               </div>
 

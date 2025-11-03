@@ -12,6 +12,7 @@ import {
 import { UserManagement } from './UserManagement';
 import { ServiceManagement } from './ServiceManagement';
 import { AppointmentManagement } from './AppointmentManagement';
+import Reports from './Reports';
 
 interface AdminDashboardProps {
   user: {
@@ -133,24 +134,32 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto p-8">
-          {activeMenu === 'usuarios' && <UserManagement />}
-          {activeMenu === 'servicios' && <ServiceManagement />}
-          {activeMenu === 'citas' && <AppointmentManagement />}
+        <div className="flex-1 overflow-hidden">
+          {activeMenu === 'usuarios' && (
+            <div className="h-full overflow-auto p-8">
+              <UserManagement />
+            </div>
+          )}
+          {activeMenu === 'servicios' && (
+            <div className="h-full overflow-auto p-8">
+              <ServiceManagement />
+            </div>
+          )}
+          {activeMenu === 'citas' && (
+            <div className="h-full overflow-auto p-8">
+              <AppointmentManagement />
+            </div>
+          )}
           {activeMenu === 'tecnicos' && (
-            <div className="text-center py-20">
-              <Wrench className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-gray-900 mb-2">Técnicos</h3>
-              <p className="text-gray-600">Gestión de técnicos en desarrollo</p>
+            <div className="h-full overflow-auto p-8">
+              <div className="text-center py-20">
+                <Wrench className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-gray-900 mb-2">Técnicos</h3>
+                <p className="text-gray-600">Gestión de técnicos en desarrollo</p>
+              </div>
             </div>
           )}
-          {activeMenu === 'reportes' && (
-            <div className="text-center py-20">
-              <FileText className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-gray-900 mb-2">Reportes</h3>
-              <p className="text-gray-600">Reportes en desarrollo</p>
-            </div>
-          )}
+          {activeMenu === 'reportes' && <Reports />}
         </div>
       </div>
     </div>
