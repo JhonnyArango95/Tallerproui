@@ -789,28 +789,30 @@ export function AppointmentManagement() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="flex flex-row items-center justify-between border-b pb-4">
-            <div className="flex items-center gap-2">
-              <Pencil className="w-5 h-5" />
-              <DialogTitle className="text-xl">Editar cita</DialogTitle>
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <div className="flex items-center justify-between pb-3 border-b">
+              <div className="flex items-center gap-2">
+                <Pencil className="w-5 h-5" />
+                <DialogTitle>Editar cita</DialogTitle>
+              </div>
+              <button
+                onClick={() => setShowEditDialog(false)}
+                className="text-orange-600 hover:text-orange-700 flex items-center gap-1"
+              >
+                <X className="w-4 h-4" />
+                Cancelar
+              </button>
             </div>
-            <button
-              onClick={() => setShowEditDialog(false)}
-              className="text-orange-600 hover:text-orange-700 flex items-center gap-1"
-            >
-              <X className="w-4 h-4" />
-              Cancelar
-            </button>
           </DialogHeader>
 
           {editingAppointment && (
-            <div className="grid grid-cols-3 gap-6 pt-4">
+            <div className="grid grid-cols-2 gap-6 overflow-auto flex-1 py-4">
               {/* Left side - Form */}
-              <div className="col-span-2 space-y-6">
+              <div className="space-y-4">
                 {/* Cliente */}
                 <div>
-                  <Label className="text-gray-700 mb-2 block">Cliente</Label>
+                  <Label className="text-gray-700 mb-1.5 block text-sm">Cliente</Label>
                   <Select
                     value={editingAppointment.client}
                     onValueChange={(value) =>
@@ -829,9 +831,9 @@ export function AppointmentManagement() {
                 </div>
 
                 {/* Vehículo */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-gray-700 mb-2 block">Vehículo</Label>
+                <div className="flex gap-3 items-end">
+                  <div className="flex-1">
+                    <Label className="text-gray-700 mb-1.5 block text-sm">Vehículo</Label>
                     <Input
                       value={editingAppointment.vehicle}
                       onChange={(e) =>
@@ -840,8 +842,8 @@ export function AppointmentManagement() {
                       className="bg-white"
                     />
                   </div>
-                  <div>
-                    <Label className="text-gray-700 mb-2 block">Placa</Label>
+                  <div className="w-32">
+                    <Label className="text-gray-700 mb-1.5 block text-sm">Placa</Label>
                     <Input
                       value={editingAppointment.vehiclePlate}
                       onChange={(e) =>
@@ -854,49 +856,61 @@ export function AppointmentManagement() {
 
                 {/* Fecha y hora */}
                 <div>
-                  <Label className="text-gray-700 mb-2 block">Fecha y hora</Label>
-                  <div className="flex gap-4">
-                    <Input 
-                      value={editingAppointment.date} 
-                      onChange={(e) =>
-                        setEditingAppointment({ ...editingAppointment, date: e.target.value })
-                      }
-                      className="bg-white" 
-                    />
-                    <Input 
-                      value={editingAppointment.time}
-                      onChange={(e) =>
-                        setEditingAppointment({ ...editingAppointment, time: e.target.value })
-                      }
-                      className="bg-white" 
-                    />
-                    <Input 
-                      value={editingAppointment.duration}
-                      onChange={(e) =>
-                        setEditingAppointment({ ...editingAppointment, duration: e.target.value })
-                      }
-                      className="bg-white" 
-                    />
+                  <Label className="text-gray-700 mb-1.5 block text-sm">Fecha y hora</Label>
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <CalendarIcon className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={editingAppointment.date} 
+                        onChange={(e) =>
+                          setEditingAppointment({ ...editingAppointment, date: e.target.value })
+                        }
+                        className="bg-white pl-8" 
+                        placeholder="Jue 17 Oct"
+                      />
+                    </div>
+                    <div className="w-28 relative">
+                      <Clock className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={editingAppointment.time}
+                        onChange={(e) =>
+                          setEditingAppointment({ ...editingAppointment, time: e.target.value })
+                        }
+                        className="bg-white pl-8" 
+                        placeholder="10:00"
+                      />
+                    </div>
+                    <div className="w-28 relative">
+                      <Clock className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={editingAppointment.duration}
+                        onChange={(e) =>
+                          setEditingAppointment({ ...editingAppointment, duration: e.target.value })
+                        }
+                        className="bg-white pl-8" 
+                        placeholder="60 min"
+                      />
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 mt-1.5">
                     Ajusta el horario para evitar solapamientos con otros trabajos.
                   </p>
                 </div>
 
                 {/* Servicios */}
                 <div>
-                  <Label className="text-gray-700 mb-2 block">Servicios</Label>
+                  <Label className="text-gray-700 mb-1.5 block text-sm">Servicios</Label>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                      <span>{editingAppointment.service}</span>
-                      <span className="px-3 py-1 bg-gray-200 rounded-full text-sm">${editingAppointment.price}</span>
+                    <div className="flex items-center justify-between p-2.5 bg-orange-50 rounded border border-orange-100">
+                      <span className="text-orange-900">{editingAppointment.service}</span>
+                      <span className="px-2.5 py-1 bg-white rounded-full text-sm border">${editingAppointment.price}</span>
                     </div>
-                    <div className="flex gap-3 mt-2">
-                      <button className="text-orange-600 text-sm flex items-center gap-1">
-                        <Plus className="w-4 h-4" />
+                    <div className="flex gap-3">
+                      <button className="text-orange-600 text-sm flex items-center gap-1 hover:text-orange-700">
+                        <Plus className="w-3.5 h-3.5" />
                         Agregar servicio
                       </button>
-                      <button className="text-orange-600 text-sm flex items-center gap-1">
+                      <button className="text-orange-600 text-sm flex items-center gap-1 hover:text-orange-700">
                         <span>🔄</span>
                         Aplicar descuento
                       </button>
@@ -906,15 +920,15 @@ export function AppointmentManagement() {
 
                 {/* Asignación */}
                 <div>
-                  <Label className="text-gray-700 mb-2 block">Asignación</Label>
-                  <div className="grid grid-cols-2 gap-4">
+                  <Label className="text-gray-700 mb-1.5 block text-sm">Asignación</Label>
+                  <div className="flex gap-3">
                     <Select
                       value={editingAppointment.technician}
                       onValueChange={(value) =>
                         setEditingAppointment({ ...editingAppointment, technician: value })
                       }
                     >
-                      <SelectTrigger className="bg-white">
+                      <SelectTrigger className="bg-white flex-1">
                         <SelectValue placeholder="Técnico" />
                       </SelectTrigger>
                       <SelectContent>
@@ -925,7 +939,7 @@ export function AppointmentManagement() {
                       </SelectContent>
                     </Select>
                     <Select defaultValue="bahia-3">
-                      <SelectTrigger className="bg-white">
+                      <SelectTrigger className="bg-white w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -935,95 +949,89 @@ export function AppointmentManagement() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-xs text-gray-500 mt-1.5">
                     Selecciona técnico y bahía disponibles.
                   </p>
-                </div>
-
-                {/* Notas */}
-                <div>
-                  <Label className="text-gray-700 mb-2 block">Notas internas</Label>
-                  <Textarea
-                    value={editingAppointment.notes}
-                    onChange={(e) =>
-                      setEditingAppointment({ ...editingAppointment, notes: e.target.value })
-                    }
-                    placeholder="Describe el problema, síntomas o instrucciones adicionales."
-                    className="bg-white min-h-24"
-                  />
                 </div>
               </div>
 
               {/* Right side - Summary */}
-              <div className="bg-gray-50 p-4 rounded-lg space-y-4">
-                <h4 className="text-gray-900">Resumen</h4>
+              <div className="bg-orange-50 p-4 rounded-lg space-y-3 h-fit">
+                <h4 className="text-orange-900 mb-3">Resumen</h4>
                 
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Cliente</p>
-                  <p className="text-orange-700">{editingAppointment.client}</p>
+                  <p className="text-xs text-orange-700 mb-0.5">Cliente</p>
+                  <p className="text-orange-900">{editingAppointment.client}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Vehículo</p>
-                  <p>{editingAppointment.vehicle} - {editingAppointment.vehiclePlate}</p>
+                  <p className="text-xs text-orange-700 mb-0.5">Vehículo</p>
+                  <p className="text-gray-900">{editingAppointment.vehicle} {editingAppointment.vehiclePlate}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Fecha</p>
-                  <p>{editingAppointment.date}</p>
+                  <p className="text-xs text-orange-700 mb-0.5">Fecha</p>
+                  <p className="text-gray-900">{editingAppointment.date}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Horario</p>
-                  <p>{editingAppointment.time} — {editingAppointment.duration}</p>
+                  <p className="text-xs text-orange-700 mb-0.5">Horario</p>
+                  <p className="text-gray-900">{editingAppointment.time} — {editingAppointment.duration}</p>
                 </div>
 
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Técnico</p>
-                  <p>{editingAppointment.technician === 'No asignado' ? (
+                  <p className="text-xs text-orange-700 mb-0.5">Técnico</p>
+                  <p className="text-gray-900">{editingAppointment.technician === 'No asignado' ? (
                     <span className="text-gray-500">{editingAppointment.technician}</span>
                   ) : (
                     editingAppointment.technician
                   )}</p>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-gray-600 mb-1">Notas internas</p>
-                  <p className="text-sm text-orange-700">
+                <div className="pt-3 border-t border-orange-200">
+                  <p className="text-xs text-orange-700 mb-0.5">Notas internas</p>
+                  <p className="text-sm text-orange-900">
                     {editingAppointment.notes || 'Sin notas'}
                   </p>
                 </div>
 
-                <div className="pt-4 border-t">
-                  <p className="text-sm text-gray-600 mb-2">Notificaciones</p>
-                  <div className="flex items-center gap-2">
-                    <input type="checkbox" id="notify" className="rounded" />
-                    <label htmlFor="notify" className="text-sm flex items-center gap-1">
-                      Reenviar confirmación al cliente
-                      <Bell className="w-4 h-4" />
-                    </label>
+                <div className="pt-3 border-t border-orange-200">
+                  <p className="text-xs text-orange-700 mb-2">Notificaciones</p>
+                  <div className="flex items-start gap-2">
+                    <input type="checkbox" id="notify" className="rounded mt-0.5" />
+                    <div className="flex-1">
+                      <label htmlFor="notify" className="text-sm text-gray-900 flex items-center gap-1">
+                        Reenviar confirmación al cliente
+                        <Bell className="w-3.5 h-3.5" />
+                      </label>
+                      <p className="text-xs text-gray-600 mt-1">Se enviará por SMS y correo.</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">Se enviará por SMS y correo.</p>
                 </div>
               </div>
             </div>
           )}
 
           {/* Footer Buttons */}
-          <div className="flex justify-between items-center pt-4 border-t mt-6">
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+          <div className="flex justify-between items-center pt-3 border-t flex-shrink-0">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowEditDialog(false)}
+              className="text-gray-600"
+            >
+              <span className="mr-1.5">←</span>
               Descartar cambios
             </Button>
-            <div className="flex gap-3">
-              <Button variant="outline" className="border-gray-300">
-                <span className="mr-2">📋</span>
+            <div className="flex gap-2.5">
+              <Button variant="outline" className="border-gray-300 text-gray-700">
+                <span className="mr-1.5">📋</span>
                 Guardar como borrador
               </Button>
               <Button
                 onClick={handleSaveEdit}
                 className="bg-orange-500 hover:bg-orange-600 text-white"
               >
-                <span className="mr-2">💾</span>
+                <span className="mr-1.5">💾</span>
                 Guardar cambios
               </Button>
             </div>
@@ -1056,105 +1064,98 @@ export function AppointmentManagement() {
 
       {/* View Dialog */}
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader className="flex flex-row items-center justify-between border-b pb-4">
+        <DialogContent className="max-w-lg max-h-[85vh] flex flex-col">
+          <DialogHeader className="flex flex-row items-center justify-between pb-4 flex-shrink-0">
             <div className="flex items-center gap-2">
               <CalendarIcon className="w-5 h-5" />
-              <DialogTitle className="text-xl">Detalle de cita</DialogTitle>
+              <DialogTitle>Detalle de cita</DialogTitle>
             </div>
             <button
               onClick={() => setShowViewDialog(false)}
-              className="text-orange-600 hover:text-orange-700 flex items-center gap-1"
+              className="text-gray-400 hover:text-gray-600"
             >
-              <X className="w-4 h-4" />
-              Cerrar
+              <X className="w-5 h-5" />
             </button>
           </DialogHeader>
 
           {viewingAppointment && (
-            <div className="grid grid-cols-3 gap-6 pt-4">
-              {/* Left side - Details */}
-              <div className="col-span-2 space-y-6">
-                {/* Fecha y Hora */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Fecha</p>
-                    <p className="text-gray-900">{viewingAppointment.date}, Oct 2025</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Hora</p>
-                    <p className="text-gray-900">{viewingAppointment.time}</p>
-                  </div>
-                </div>
-
-                {/* Cliente */}
+            <div className="space-y-3 pt-2 overflow-y-auto flex-1 pr-2">
+              {/* Fecha y Hora */}
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Cliente</p>
-                  <p className="text-gray-900">{viewingAppointment.client}</p>
+                  <p className="text-sm text-gray-600 mb-1">Fecha</p>
+                  <p className="text-gray-900">{viewingAppointment.date}, Oct 2025</p>
                 </div>
-
-                {/* Vehículo */}
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Vehículo</p>
-                  <p className="text-gray-900">
-                    {viewingAppointment.vehicle} — Placa {viewingAppointment.vehiclePlate}
-                  </p>
-                </div>
-
-                {/* Servicio */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Servicio</p>
-                  <p className="text-gray-900">{viewingAppointment.service}</p>
-                </div>
-
-                {/* Taller */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Taller</p>
-                  <p className="text-gray-900">{viewingAppointment.location}</p>
-                </div>
-
-                {/* Descripción / Notas */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">Descripción / Notas</p>
-                  <p className="text-gray-900">
-                    {viewingAppointment.notes || 'Sin notas adicionales'}
-                  </p>
+                  <p className="text-sm text-gray-600 mb-1">Hora</p>
+                  <p className="text-gray-900">{viewingAppointment.time}</p>
                 </div>
               </div>
 
-              {/* Right side - Status & Contact */}
-              <div className="space-y-6">
-                {/* Estado */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">Estado</p>
-                  {getStatusBadge(viewingAppointment.status)}
-                </div>
+              {/* Cliente */}
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Cliente</p>
+                <p className="text-gray-900">{viewingAppointment.client}</p>
+              </div>
 
-                {/* Técnico asignado */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">Técnico asignado</p>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                      <User className="w-4 h-4 text-orange-600" />
-                    </div>
-                    <span className="text-gray-900">
-                      {viewingAppointment.technician}
-                    </span>
+              {/* Vehículo */}
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Vehículo</p>
+                <p className="text-gray-900">
+                  {viewingAppointment.vehicle} — Placa {viewingAppointment.vehiclePlate}
+                </p>
+              </div>
+
+              {/* Servicio */}
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Servicio</p>
+                <p className="text-gray-900">{viewingAppointment.service}</p>
+              </div>
+
+              {/* Taller */}
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Taller</p>
+                <p className="text-gray-900">{viewingAppointment.location}</p>
+              </div>
+
+              {/* Descripción / Notas */}
+              <div>
+                <p className="text-sm text-gray-600 mb-1">Descripción / Notas</p>
+                <p className="text-gray-900">
+                  {viewingAppointment.notes || 'Sin notas adicionales'}
+                </p>
+              </div>
+
+              {/* Estado */}
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Estado</p>
+                {getStatusBadge(viewingAppointment.status)}
+              </div>
+
+              {/* Técnico asignado */}
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Técnico asignado</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                    <User className="w-4 h-4 text-orange-600" />
                   </div>
+                  <span className="text-gray-900">
+                    {viewingAppointment.technician}
+                  </span>
                 </div>
+              </div>
 
-                {/* Contacto */}
-                <div>
-                  <p className="text-sm text-gray-600 mb-2">Contacto</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="w-4 h-4 text-gray-500" />
-                      <span>{viewingAppointment.clientPhone}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="w-4 h-4 text-gray-500" />
-                      <span>{viewingAppointment.clientEmail}</span>
-                    </div>
+              {/* Contacto */}
+              <div>
+                <p className="text-sm text-gray-600 mb-2">Contacto</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Phone className="w-4 h-4 text-gray-500" />
+                    <span>{viewingAppointment.clientPhone}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Mail className="w-4 h-4 text-gray-500" />
+                    <span>{viewingAppointment.clientEmail}</span>
                   </div>
                 </div>
               </div>
@@ -1162,101 +1163,93 @@ export function AppointmentManagement() {
           )}
 
           {/* Footer Buttons */}
-          <div className="flex justify-between items-center pt-4 border-t mt-6">
-            <Button variant="outline" onClick={() => setShowViewDialog(false)}>
-              <Printer className="w-4 h-4 mr-2" />
+          <div className="flex flex-wrap gap-2 pt-4 border-t mt-4 flex-shrink-0">
+            <Button variant="outline" size="sm">
+              <Printer className="w-4 h-4 mr-1" />
               Imprimir
             </Button>
-            <div className="flex gap-3">
-              <Button variant="outline">
-                <RotateCcw className="w-4 h-4 mr-2" />
-                Reprogramar
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (viewingAppointment) {
-                    setShowViewDialog(false);
-                    handleEdit(viewingAppointment);
-                  }
-                }}
-              >
-                <Pencil className="w-4 h-4 mr-2" />
-                Editar
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (viewingAppointment) {
-                    setShowViewDialog(false);
-                    handleDeleteClick(viewingAppointment);
-                  }
-                }}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar
-              </Button>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Abrir detalle
-              </Button>
-            </div>
+            <Button variant="outline" size="sm">
+              <RotateCcw className="w-4 h-4 mr-1" />
+              Reprogramar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (viewingAppointment) {
+                  setShowViewDialog(false);
+                  handleEdit(viewingAppointment);
+                }
+              }}
+            >
+              <Pencil className="w-4 h-4 mr-1" />
+              Editar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (viewingAppointment) {
+                  setShowViewDialog(false);
+                  handleDeleteClick(viewingAppointment);
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Eliminar
+            </Button>
+            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
+              <ExternalLink className="w-4 h-4 mr-1" />
+              Abrir detalle
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Delete Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader className="flex flex-row items-center justify-between border-b pb-4">
+        <DialogContent className="max-w-xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="pb-4 flex-shrink-0">
             <div className="flex items-center gap-2">
-              <Trash2 className="w-5 h-5 text-red-600" />
-              <DialogTitle className="text-xl">Eliminar cita</DialogTitle>
+              <Trash2 className="w-5 h-5" />
+              <DialogTitle>Eliminar cita</DialogTitle>
             </div>
-            <button
-              onClick={() => setShowDeleteDialog(false)}
-              className="text-orange-600 hover:text-orange-700 flex items-center gap-1"
-            >
-              <X className="w-4 h-4" />
-              Cancelar
-            </button>
           </DialogHeader>
 
           {deletingAppointment && (
-            <div className="space-y-6 pt-4">
+            <div className="space-y-4 pt-2 overflow-y-auto flex-1 pr-2">
               {/* Warning Banner */}
               <div className="bg-orange-500 text-white p-4 rounded-lg flex gap-3">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="mb-1">Esta acción no se puede deshacer.</p>
                   <p className="text-sm text-orange-100">
-                    Se eliminarán permanentemente la cita seleccionada y sus registros asociados
-                    (recordatorios, historial de cambios).
+                    Se eliminarán permanentemente la cita seleccionada y sus registros asociados (recordatorios, historial de cambios).
                   </p>
                 </div>
               </div>
 
               {/* Appointment Info */}
-              <div className="space-y-3">
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-sm text-gray-600">Cliente</span>
+              <div className="bg-orange-50 p-4 rounded space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-700">Cliente</span>
                   <span className="text-gray-900">{deletingAppointment.client}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-sm text-gray-600">Vehículo</span>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-700">Vehículo</span>
                   <span className="text-gray-900">
                     {deletingAppointment.vehicle} - {deletingAppointment.vehiclePlate}
                   </span>
                 </div>
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-sm text-gray-600">Fecha y hora</span>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-700">Fecha y hora</span>
                   <span className="text-gray-900">
                     {deletingAppointment.date}, {deletingAppointment.time} — {deletingAppointment.duration}
                   </span>
                 </div>
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-sm text-gray-600">Servicios</span>
-                  <span className="text-gray-900">{deletingAppointment.service}</span>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-700">Servicios</span>
+                  <span className="text-gray-900">2 ítems</span>
                 </div>
               </div>
 
@@ -1274,18 +1267,14 @@ export function AppointmentManagement() {
                   </label>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-gray-900">Notificación SMS de confirmación</p>
-                    </div>
-                    <span className="text-xs text-gray-500">Programada 16 Oct, 18:00</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm py-2">
+                    <span className="text-gray-900">Notificación SMS de confirmación</span>
+                    <span className="text-gray-500">Programada 16 Oct, 18:00</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-gray-900">Recordatorio 24h</p>
-                    </div>
-                    <span className="text-xs text-gray-500">Programada 16 Oct, 10:00</span>
+                  <div className="flex justify-between items-center text-sm py-2">
+                    <span className="text-gray-900">Recordatorio 24h</span>
+                    <span className="text-gray-500">Programada 16 Oct, 10:00</span>
                   </div>
                 </div>
               </div>
@@ -1293,22 +1282,23 @@ export function AppointmentManagement() {
           )}
 
           {/* Footer Buttons */}
-          <div className="flex justify-between items-center pt-4 border-t mt-6">
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+          <div className="flex justify-between items-center pt-4 border-t mt-4 flex-shrink-0">
+            <Button variant="outline" size="sm" onClick={() => setShowDeleteDialog(false)}>
               <RotateCcw className="w-4 h-4 mr-2" />
               Volver
             </Button>
-            <div className="flex gap-3">
-              <Button variant="outline">
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
                 <Archive className="w-4 h-4 mr-2" />
                 Archivar en lugar de eliminar
               </Button>
               <Button
+                size="sm"
                 onClick={handleConfirmDelete}
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                Eliminar definitivamente
+                Eliminar
               </Button>
             </div>
           </div>
