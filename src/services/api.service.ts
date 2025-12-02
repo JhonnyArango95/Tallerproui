@@ -224,3 +224,85 @@ export const authService = {
     }
   },
 };
+
+// Servicios para Empleados (Admin)
+export const empleadosService = {
+  // Listar todos los empleados
+  listarEmpleados: async (): Promise<import('../config/api').EmpleadoResponse[]> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.EMPLEADOS}`;
+    console.log('📦 Obteniendo empleados desde:', url);
+    return await fetchAPI<import('../config/api').EmpleadoResponse[]>(url);
+  },
+
+  // Crear nuevo empleado
+  crearEmpleado: async (empleado: import('../config/api').EmpleadoRequest): Promise<import('../config/api').EmpleadoResponse> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.EMPLEADOS}`;
+    console.log('📦 Creando empleado en:', url);
+    console.log('📤 Datos del empleado:', empleado);
+    return await fetchAPI<import('../config/api').EmpleadoResponse>(url, {
+      method: 'POST',
+      body: JSON.stringify(empleado),
+    });
+  },
+
+  // Editar empleado existente
+  editarEmpleado: async (id: number, empleado: import('../config/api').EmpleadoRequest): Promise<import('../config/api').EmpleadoResponse> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.EMPLEADO_BY_ID(id)}`;
+    console.log('📦 Editando empleado en:', url);
+    console.log('📤 Datos actualizados:', empleado);
+    return await fetchAPI<import('../config/api').EmpleadoResponse>(url, {
+      method: 'PUT',
+      body: JSON.stringify(empleado),
+    });
+  },
+
+  // Eliminar empleado
+  eliminarEmpleado: async (id: number): Promise<void> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.EMPLEADO_BY_ID(id)}`;
+    console.log('📦 Eliminando empleado en:', url);
+    return await fetchAPI<void>(url, {
+      method: 'DELETE',
+    });
+  },
+};
+
+// Servicios para Servicios/Catálogo (Admin)
+export const serviciosService = {
+  // Listar todos los servicios
+  listarServicios: async (): Promise<import('../config/api').ServicioResponse[]> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.SERVICIOS}`;
+    console.log('📦 Obteniendo servicios desde:', url);
+    return await fetchAPI<import('../config/api').ServicioResponse[]>(url);
+  },
+
+  // Crear nuevo servicio
+  crearServicio: async (servicio: import('../config/api').ServicioRequest): Promise<import('../config/api').ServicioResponse> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.SERVICIOS}`;
+    console.log('📦 Creando servicio en:', url);
+    console.log('📤 Datos del servicio:', servicio);
+    return await fetchAPI<import('../config/api').ServicioResponse>(url, {
+      method: 'POST',
+      body: JSON.stringify(servicio),
+    });
+  },
+
+  // Editar servicio existente
+  editarServicio: async (id: number, servicio: import('../config/api').ServicioRequest): Promise<import('../config/api').ServicioResponse> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.SERVICIO_BY_ID(id)}`;
+    console.log('📦 Editando servicio en:', url);
+    console.log('📤 Datos actualizados:', servicio);
+    return await fetchAPI<import('../config/api').ServicioResponse>(url, {
+      method: 'PUT',
+      body: JSON.stringify(servicio),
+    });
+  },
+
+  // Eliminar servicio
+  eliminarServicio: async (id: number): Promise<void> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}${API_CONFIG.ENDPOINTS.SERVICIO_BY_ID(id)}`;
+    console.log('📦 Eliminando servicio en:', url);
+    return await fetchAPI<void>(url, {
+      method: 'DELETE',
+    });
+  },
+};

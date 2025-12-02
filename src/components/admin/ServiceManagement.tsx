@@ -1,5 +1,5 @@
 /* ============================================
-   GESTIÓN DE SERVICIOS - COMPONENTE COMPLETO
+   GESTIÓN DE SERVICIOS - COMPONENTE CON API REAL
    ============================================
    
    Este componente maneja el CRUD completo de servicios:
@@ -7,9 +7,11 @@
    - READ (Listar y filtrar servicios)
    - UPDATE (Editar servicios existentes)
    - DELETE (Eliminar servicios)
+   
+   ✅ Conectado al backend Spring Boot
 */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -17,6 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../ui/textarea';
 import { Pencil, Trash2, Search, CheckCircle2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import { serviciosService } from '../../services/api.service';
+import type { ServicioResponse } from '../../config/api';
+import { toast } from 'sonner@2.0.3';
 
 /* ============================================
    INTERFACE - ESTRUCTURA DE UN SERVICIO
@@ -27,66 +32,22 @@ interface Service {
   id: number;                 // Identificador único
   name: string;               // Nombre del servicio
   category: string;           // Categoría (General, Frenos, Motor, Eléctrico)
-  price: string;              // Precio del servicio
-  estimatedDuration: string;  // Duración estimada (ej. 2.5h)
+  price: number;              // Precio del servicio
+  estimatedDuration: number;  // Duración estimada en horas
   description: string;        // Descripción detallada
   requirements: string;       // Requisitos (herramientas, repuestos)
   warranty: string;           // Garantía (ej. 3 meses / 5,000 km)
-  enabled: string;            // Estado (activo/inactivo)
+  enabled: boolean;           // Estado (true/false)
 }
 
 export function ServiceManagement() {
   /* ============================================
-     ESTADO 1: LISTA DE SERVICIOS (DATOS MOCK)
+     ESTADO 1: LISTA DE SERVICIOS (DESDE API)
      ============================================
      Array con todos los servicios del sistema
   */
-  const [services, setServices] = useState<Service[]>([
-    {
-      id: 1,
-      name: 'Alineación y balanceo',
-      category: 'General / Frenos / Motor / Eléctrico',
-      price: '45.00',
-      estimatedDuration: '2.5h',
-      description: 'Servicio completo de alineación y balanceo',
-      requirements: 'Herramientas, repuestos, notas',
-      warranty: '3 meses / 5,000 km',
-      enabled: 'activo',
-    },
-    {
-      id: 2,
-      name: 'Diagnóstico eléctrico',
-      category: 'Eléctrico',
-      price: '35.00',
-      estimatedDuration: '1.5h',
-      description: 'Revisión completa del sistema eléctrico',
-      requirements: 'Escáner, multímetro',
-      warranty: '1 mes / 2,000 km',
-      enabled: 'inactivo',
-    },
-    {
-      id: 3,
-      name: 'Servicio de frenos',
-      category: 'Frenos',
-      price: '80.00',
-      estimatedDuration: '2h',
-      description: 'Cambio de pastillas y revisión completa',
-      requirements: 'Pastillas, líquido de frenos',
-      warranty: '6 meses / 10,000 km',
-      enabled: 'activo',
-    },
-        {
-      id: 4,
-      name: 'Servicio de caja mecanica',
-      category: 'General / Frenos / Motor / Eléctrico',
-      price: '180.00',
-      estimatedDuration: '3h',
-      description: 'Cambio de caja mecanica',
-      requirements: 'Cajate mecanica',
-      warranty: '8 meses / 15,000 km',
-      enabled: 'activo',
-    },
-  ]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   /* ============================================
      ESTADO 2: DATOS DEL FORMULARIO
@@ -135,6 +96,46 @@ export function ServiceManagement() {
   });
 
   /* ============================================
+     EFECTO: CARGAR SERVICIOS AL INICIO
+     ============================================
+     Se ejecuta una vez cuando el componente se monta
+  */
+  useEffect(() => {
+    cargarServicios();
+  }, []);
+
+  /* ============================================
+     FUNCIÓN: CARGAR SERVICIOS DESDE API
+     ============================================
+  */
+  const cargarServicios = async () => {
+    try {
+      setIsLoading(true);
+      const servicios = await serviciosService.listarServicios();
+      
+      // Mapear respuesta del backend a formato del frontend
+      const serviciosMapeados: Service[] = servicios.map((srv: ServicioResponse) => ({
+        id: srv.id,
+        name: srv.nombre,
+        category: srv.categoria,
+        price: srv.precio,
+        estimatedDuration: srv.duracionEstimada,
+        description: srv.descripcion,
+        requirements: srv.requisitos,
+        warranty: srv.garantia,
+        enabled: srv.habilitado,
+      }));
+      
+      setServices(serviciosMapeados);
+    } catch (error) {
+      console.error('Error al cargar servicios:', error);
+      toast.error('Error al cargar la lista de servicios');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /* ============================================
      FUNCIÓN 1: MANEJAR CAMBIOS EN EL FORMULARIO
      ============================================
      Se ejecuta cada vez que escribes en un campo
@@ -168,66 +169,75 @@ export function ServiceManagement() {
      ============================================
      Se ejecuta al dar clic en "Guardar"
   */
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // VALIDACIÓN: Verifica que los campos obligatorios estén llenos
-    if (!formData.name || !formData.category || !formData.price) {
-      alert('Por favor completa los campos obligatorios');
+    if (!formData.name || !formData.category || !formData.price || !formData.estimatedDuration || !formData.enabled) {
+      toast.error('Por favor completa todos los campos obligatorios');
       return;
     }
 
-    if (editingServiceId) {
-      /* ============================================
-         MODO EDITAR: Actualiza servicio existente
-         ============================================ */
-      setServices(
-        services.map((service) =>
-          service.id === editingServiceId
-            ? {
-                ...service,
-                name: formData.name,
-                category: formData.category,
-                price: formData.price,
-                estimatedDuration: formData.estimatedDuration,
-                description: formData.description,
-                requirements: formData.requirements,
-                warranty: formData.warranty,
-                enabled: formData.enabled,
-              }
-            : service
-        )
-      );
-      // Mensaje de éxito para edición
-      setSuccessMessage({
-        title: 'Servicio modificado',
-        description: 'El servicio se ha actualizado correctamente en el sistema.',
-      });
-    } else {
-      /* ============================================
-         MODO CREAR: Agrega nuevo servicio
-         ============================================ */
-      const newService: Service = {
-        id: services.length + 1,
-        name: formData.name,
-        category: formData.category,
-        price: formData.price,
-        estimatedDuration: formData.estimatedDuration,
-        description: formData.description,
-        requirements: formData.requirements,
-        warranty: formData.warranty,
-        enabled: formData.enabled,
-      };
-      setServices([...services, newService]);
-      // Mensaje de éxito para creación
-      setSuccessMessage({
-        title: 'Servicio registrado',
-        description: 'El nuevo servicio ha sido agregado exitosamente.',
-      });
+    // VALIDACIÓN: Verifica que el precio sea un número válido
+    const precio = parseFloat(formData.price);
+    if (isNaN(precio) || precio <= 0) {
+      toast.error('El precio debe ser un número válido mayor a 0');
+      return;
     }
 
-    // Muestra el popup de éxito
-    setShowSuccessDialog(true);
-    // Limpia el formulario
-    handleClear();
+    // VALIDACIÓN: Verifica que la duración sea un número válido
+    const duracion = parseFloat(formData.estimatedDuration);
+    if (isNaN(duracion) || duracion <= 0) {
+      toast.error('La duración debe ser un número válido mayor a 0');
+      return;
+    }
+
+    try {
+      // Preparar datos para enviar al backend
+      const servicioData = {
+        nombre: formData.name,
+        categoria: formData.category,
+        precio: precio,
+        duracionEstimada: duracion,
+        descripcion: formData.description,
+        requisitos: formData.requirements,
+        garantia: formData.warranty,
+        habilitado: formData.enabled === 'true' || formData.enabled === 'activo',
+      };
+
+      if (editingServiceId) {
+        /* ============================================
+           MODO EDITAR: Actualiza servicio existente
+           ============================================ */
+        await serviciosService.editarServicio(editingServiceId, servicioData);
+        
+        // Mensaje de éxito para edición
+        setSuccessMessage({
+          title: 'Servicio modificado',
+          description: 'El servicio se ha actualizado correctamente en el sistema.',
+        });
+      } else {
+        /* ============================================
+           MODO CREAR: Agrega nuevo servicio
+           ============================================ */
+        await serviciosService.crearServicio(servicioData);
+        
+        // Mensaje de éxito para creación
+        setSuccessMessage({
+          title: 'Servicio registrado',
+          description: 'El nuevo servicio ha sido agregado exitosamente.',
+        });
+      }
+
+      // Muestra el popup de éxito
+      setShowSuccessDialog(true);
+      // Limpia el formulario
+      handleClear();
+      // Recarga la lista de servicios
+      await cargarServicios();
+      
+    } catch (error) {
+      console.error('Error al guardar servicio:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al guardar el servicio');
+    }
   };
 
   /* ============================================
@@ -241,12 +251,12 @@ export function ServiceManagement() {
       id: service.id,
       name: service.name,
       category: service.category,
-      price: service.price,
-      estimatedDuration: service.estimatedDuration,
+      price: service.price.toString(),
+      estimatedDuration: service.estimatedDuration.toString(),
       description: service.description,
       requirements: service.requirements,
       warranty: service.warranty,
-      enabled: service.enabled,
+      enabled: service.enabled ? 'true' : 'false',
     });
     setEditingServiceId(service.id); // Activa modo edición
   };
@@ -256,14 +266,24 @@ export function ServiceManagement() {
      ============================================
      Se ejecuta al dar clic en el icono de basura
   */
-  const handleDelete = (serviceId: number) => {
+  const handleDelete = async (serviceId: number) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
-      setServices(services.filter((service) => service.id !== serviceId));
-      setSuccessMessage({
-        title: 'Servicio eliminado',
-        description: 'El servicio se ha eliminado completamente del sistema.',
-      });
-      setShowSuccessDialog(true);
+      try {
+        await serviciosService.eliminarServicio(serviceId);
+        
+        setSuccessMessage({
+          title: 'Servicio eliminado',
+          description: 'El servicio se ha eliminado completamente del sistema.',
+        });
+        setShowSuccessDialog(true);
+        
+        // Recarga la lista de servicios
+        await cargarServicios();
+        
+      } catch (error) {
+        console.error('Error al eliminar servicio:', error);
+        toast.error(error instanceof Error ? error.message : 'Error al eliminar el servicio');
+      }
     }
   };
 
@@ -274,8 +294,10 @@ export function ServiceManagement() {
   */
   const filteredServices = services.filter((service) => {
     const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = filterCategory === 'todos' || service.category.includes(filterCategory);
-    const matchesStatus = filterStatus === 'todos' || service.enabled === filterStatus;
+    const matchesCategory = filterCategory === 'todos' || service.category.toLowerCase().includes(filterCategory.toLowerCase());
+    const matchesStatus = filterStatus === 'todos' || 
+      (filterStatus === 'activo' && service.enabled) || 
+      (filterStatus === 'inactivo' && !service.enabled);
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -323,16 +345,15 @@ export function ServiceManagement() {
             <Label className="text-gray-700 mb-2 block">Categoría</Label>
             <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
               <SelectTrigger className="bg-white">
-                <SelectValue placeholder="General / Frenos / Motor / Eléctrico" />
+                <SelectValue placeholder="Seleccionar categoría" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="General">General</SelectItem>
                 <SelectItem value="Frenos">Frenos</SelectItem>
                 <SelectItem value="Motor">Motor</SelectItem>
                 <SelectItem value="Eléctrico">Eléctrico</SelectItem>
-                <SelectItem value="General / Frenos / Motor / Eléctrico">
-                  General / Frenos / Motor / Eléctrico
-                </SelectItem>
+                <SelectItem value="Transmisión">Transmisión</SelectItem>
+                <SelectItem value="Suspensión">Suspensión</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -341,21 +362,24 @@ export function ServiceManagement() {
           <div>
             <Label className="text-gray-700 mb-2 block">Precio</Label>
             <Input
-              type="text"
+              type="number"
+              step="0.01"
               value={formData.price}
               onChange={(e) => handleInputChange('price', e.target.value)}
-              placeholder="Ej. $45.00"
+              placeholder="Ej. 45.00"
               className="bg-white"
             />
           </div>
 
           {/* CAMPO: Duración estimada */}
           <div>
-            <Label className="text-gray-700 mb-2 block">Duración estimada</Label>
+            <Label className="text-gray-700 mb-2 block">Duración estimada (horas)</Label>
             <Input
+              type="number"
+              step="0.5"
               value={formData.estimatedDuration}
               onChange={(e) => handleInputChange('estimatedDuration', e.target.value)}
-              placeholder="Ej. 1.5h"
+              placeholder="Ej. 1.5"
               className="bg-white"
             />
           </div>
@@ -382,16 +406,16 @@ export function ServiceManagement() {
             />
           </div>
 
-          {/* CAMPO: Habilitado (Activo/Inactivo) */}
+          {/* CAMPO: Habilitado (Sí/No) */}
           <div>
             <Label className="text-gray-700 mb-2 block">Habilitado</Label>
             <Select value={formData.enabled} onValueChange={(value) => handleInputChange('enabled', value)}>
               <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Sí / No" />
+                <SelectValue placeholder="Seleccionar estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="activo">Sí</SelectItem>
-                <SelectItem value="inactivo">No</SelectItem>
+                <SelectItem value="true">Sí</SelectItem>
+                <SelectItem value="false">No</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -419,7 +443,7 @@ export function ServiceManagement() {
             Limpiar
           </Button>
           <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 text-white">
-            Guardar
+            {editingServiceId ? 'Actualizar' : 'Guardar'}
           </Button>
         </div>
       </div>
@@ -458,6 +482,8 @@ export function ServiceManagement() {
               <SelectItem value="Frenos">Frenos</SelectItem>
               <SelectItem value="Motor">Motor</SelectItem>
               <SelectItem value="Eléctrico">Eléctrico</SelectItem>
+              <SelectItem value="Transmisión">Transmisión</SelectItem>
+              <SelectItem value="Suspensión">Suspensión</SelectItem>
             </SelectContent>
           </Select>
 
@@ -475,75 +501,87 @@ export function ServiceManagement() {
         </div>
 
         {/* TABLA DE SERVICIOS */}
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full">
-            {/* ENCABEZADO DE LA TABLA */}
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="text-left px-4 py-3 text-sm text-gray-700">#</th>
-                <th className="text-left px-4 py-3 text-sm text-gray-700">Servicio</th>
-                <th className="text-left px-4 py-3 text-sm text-gray-700">Duración estimada</th>
-                <th className="text-left px-4 py-3 text-sm text-gray-700">Estado</th>
-                <th className="text-left px-4 py-3 text-sm text-gray-700">Acciones</th>
-              </tr>
-            </thead>
-            {/* CUERPO DE LA TABLA (filas con datos) */}
-            <tbody>
-              {filteredServices.map((service, index) => (
-                <tr key={service.id} className="border-b last:border-b-0 hover:bg-gray-50">
-                  {/* Columna: Número de fila */}
-                  <td className="px-4 py-3 text-sm">{index + 1}</td>
-                  
-                  {/* Columna: Nombre y categoría del servicio */}
-                  <td className="px-4 py-3">
-                    <div>
-                      <p className="text-sm text-gray-900">{service.name}</p>
-                      <p className="text-xs text-gray-500">{service.category}</p>
-                    </div>
-                  </td>
-                  
-                  {/* Columna: Duración estimada */}
-                  <td className="px-4 py-3 text-sm text-gray-600">{service.estimatedDuration}</td>
-                  
-                  {/* Columna: Estado (badge verde o rojo) */}
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-1 rounded text-xs ${
-                        service.enabled === 'activo'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {service.enabled === 'activo' ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  
-                  {/* Columna: Acciones (Editar y Eliminar) */}
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      {/* Botón EDITAR */}
-                      <button
-                        onClick={() => handleEdit(service)}
-                        className="p-1.5 hover:bg-gray-100 rounded"
-                        title="Editar"
-                      >
-                        <Pencil className="w-4 h-4 text-gray-600" />
-                      </button>
-                      {/* Botón ELIMINAR */}
-                      <button
-                        onClick={() => handleDelete(service.id)}
-                        className="p-1.5 hover:bg-red-50 rounded"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </button>
-                    </div>
-                  </td>
+        {isLoading ? (
+          <div className="text-center py-8 text-gray-500">Cargando servicios...</div>
+        ) : (
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              {/* ENCABEZADO DE LA TABLA */}
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="text-left px-4 py-3 text-sm text-gray-700">#</th>
+                  <th className="text-left px-4 py-3 text-sm text-gray-700">Servicio</th>
+                  <th className="text-left px-4 py-3 text-sm text-gray-700">Duración estimada</th>
+                  <th className="text-left px-4 py-3 text-sm text-gray-700">Estado</th>
+                  <th className="text-left px-4 py-3 text-sm text-gray-700">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              {/* CUERPO DE LA TABLA (filas con datos) */}
+              <tbody>
+                {filteredServices.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8 text-gray-500">
+                      No se encontraron servicios
+                    </td>
+                  </tr>
+                ) : (
+                  filteredServices.map((service, index) => (
+                    <tr key={service.id} className="border-b last:border-b-0 hover:bg-gray-50">
+                      {/* Columna: Número de fila */}
+                      <td className="px-4 py-3 text-sm">{index + 1}</td>
+                      
+                      {/* Columna: Nombre y categoría del servicio */}
+                      <td className="px-4 py-3">
+                        <div>
+                          <p className="text-sm text-gray-900">{service.name}</p>
+                          <p className="text-xs text-gray-500">{service.category}</p>
+                        </div>
+                      </td>
+                      
+                      {/* Columna: Duración estimada */}
+                      <td className="px-4 py-3 text-sm text-gray-600">{service.estimatedDuration}h</td>
+                      
+                      {/* Columna: Estado (badge verde o rojo) */}
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded text-xs ${
+                            service.enabled
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
+                          }`}
+                        >
+                          {service.enabled ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      
+                      {/* Columna: Acciones (Editar y Eliminar) */}
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2">
+                          {/* Botón EDITAR */}
+                          <button
+                            onClick={() => handleEdit(service)}
+                            className="p-1.5 hover:bg-gray-100 rounded"
+                            title="Editar"
+                          >
+                            <Pencil className="w-4 h-4 text-gray-600" />
+                          </button>
+                          {/* Botón ELIMINAR */}
+                          <button
+                            onClick={() => handleDelete(service.id)}
+                            className="p-1.5 hover:bg-red-50 rounded"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* ========================================

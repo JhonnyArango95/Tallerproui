@@ -6,6 +6,9 @@ export const API_CONFIG = {
   // URL base para autenticación (diferente ruta)
   AUTH_BASE_URL: 'http://localhost:8080/tallerpro-api-1.0.0/api/auth',
   
+  // URL base para administración
+  ADMIN_BASE_URL: 'http://localhost:8080/tallerpro-api-pe-1.0.0/api/admin',
+  
   // Modo de desarrollo: usar datos mock si la API no está disponible
   USE_MOCK_DATA: false, // Cambiado a false para usar la API real
   
@@ -24,6 +27,14 @@ export const API_CONFIG = {
     // Autenticación
     LOGIN: '/login',
     REGISTER: '/register',
+    
+    // Empleados (Admin)
+    EMPLEADOS: '/empleados',
+    EMPLEADO_BY_ID: (id: number) => `/empleados/${id}`,
+    
+    // Servicios (Admin)
+    SERVICIOS: '/servicios',
+    SERVICIO_BY_ID: (id: number) => `/servicios/${id}`,
   }
 };
 
@@ -123,4 +134,51 @@ export interface AuthResponse {
     email: string;
   };
   message?: string;
+}
+
+// Interfaces para Empleados (Admin)
+export interface EmpleadoRequest {
+  nombre: string;
+  apellido: string;
+  correo: string;
+  telefono: string;
+  rol: string;  // "ADMINISTRADOR", "MECANICO", "RECEPCION", etc.
+  estado: string;  // "ACTIVO", "INACTIVO"
+  password: string;
+}
+
+export interface EmpleadoResponse {
+  id: number;
+  nombre: string;
+  apellido: string;
+  correo: string;
+  telefono: string;
+  rol: string;
+  estado: string;
+  fechaRegistro?: string;
+}
+
+// Interfaces para Servicios (Admin)
+export interface ServicioRequest {
+  nombre: string;
+  categoria: string;  // "General", "Frenos", "Motor", etc.
+  precio: number;
+  duracionEstimada: number;  // En horas
+  descripcion: string;
+  requisitos: string;
+  garantia: string;
+  habilitado: boolean;  // true/false
+}
+
+export interface ServicioResponse {
+  id: number;
+  nombre: string;
+  categoria: string;
+  precio: number;
+  duracionEstimada: number;
+  descripcion: string;
+  requisitos: string;
+  garantia: string;
+  habilitado: boolean;
+  fechaCreacion?: string;
 }
