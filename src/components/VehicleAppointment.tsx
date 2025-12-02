@@ -35,13 +35,13 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
   });
 
   const [appointmentData, setAppointmentData] = useState({
-    location: 'Av. Aviación 1003, La Victoria (Lima)',
+    location: '',
     date: '',
     time: '',
   });
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9)); // Octubre 2025
+  const [currentMonth, setCurrentMonth] = useState(new Date()); // Mes actual
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   // Estados para datos de la API
@@ -98,10 +98,18 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
   }, [vehicleData.brand, marcas]);
 
   const services = [
-    { value: 'preventivo', label: 'Preventivo' },
-    { value: 'correctivo', label: 'Correctivo' },
-    { value: 'carroceria', label: 'Carrocería y Pintura' },
-    { value: 'repuestos', label: 'Repuestos y Accesorios' },
+    { value: 'Preventivo', label: 'Preventivo' },
+    { value: 'Correctivo', label: 'Correctivo' },
+    { value: 'Carrocería y Pintura', label: 'Carrocería y Pintura' },
+    { value: 'Repuestos y Accesorios', label: 'Repuestos y Accesorios' },
+    { value: 'Mecánica General', label: 'Mecánica General' },
+    { value: 'Transmisión', label: 'Transmisión' },
+    { value: 'Frenos', label: 'Frenos' },
+    { value: 'Suspensión y Dirección', label: 'Suspensión y Dirección' },
+    { value: 'Sistema Eléctrico', label: 'Sistema Eléctrico' },
+    { value: 'Diagnóstico Computarizado', label: 'Diagnóstico Computarizado' },
+    { value: 'Cambio de Aceite', label: 'Cambio de Aceite' },
+    { value: 'Alineamiento y Balanceo', label: 'Alineamiento y Balanceo' },
   ];
 
   const years = Array.from({ length: 30 }, (_, i) => (new Date().getFullYear() - i).toString());
@@ -181,6 +189,9 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
     }
     if (!vehicleData.service) {
       errors.service = 'El servicio es requerido';
+    }
+    if (!appointmentData.location) {
+      errors.location = 'Selecciona un local';
     }
     if (!appointmentData.date) {
       errors.date = 'Selecciona una fecha';
@@ -447,15 +458,27 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
                 Local
               </Label>
               <Select value={appointmentData.location} onValueChange={(value) => setAppointmentData({ ...appointmentData, location: value })}>
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger className={validationErrors.location ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Selecciona un local" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Av. Aviación 1003, La Victoria (Lima)">
                     Av. Aviación 1003, La Victoria (Lima)
                   </SelectItem>
+                  <SelectItem value="Av. Javier Prado Este 5268, La Molina (Lima)">
+                    Av. Javier Prado Este 5268, La Molina (Lima)
+                  </SelectItem>
+                  <SelectItem value="Av. Universitaria 1801, San Miguel (Lima)">
+                    Av. Universitaria 1801, San Miguel (Lima)
+                  </SelectItem>
+                  <SelectItem value="Av. Los Héroes 123, San Juan de Miraflores (Lima)">
+                    Av. Los Héroes 123, San Juan de Miraflores (Lima)
+                  </SelectItem>
                 </SelectContent>
               </Select>
+              {validationErrors.location && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.location}</p>
+              )}
             </div>
 
             {/* Calendar */}

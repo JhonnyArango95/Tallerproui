@@ -92,8 +92,26 @@ export function RescheduleSearch({ onBack, onSearchSuccess }: RescheduleSearchPr
         onSearchSuccess(appointmentData);
         
       } catch (error) {
-        console.error('Error al buscar la cita:', error);
-        toast.error(error instanceof Error ? error.message : 'No se encontró la cita. Verifica los datos e intenta de nuevo.');
+        console.error('❌ Error al buscar la cita:', error);
+        
+        // Mensaje personalizado dependiendo del tipo de error
+        let errorMessage = 'No se encontró la cita. Verifica los datos e intenta de nuevo.';
+        
+        if (error instanceof Error) {
+          if (error.message.includes('400')) {
+            errorMessage = 'No se encontró una cita agendada con esos datos. Verifica DNI o Placa.';
+          } else if (error.message.includes('404')) {
+            errorMessage = 'Cita no encontrada. Verifica que el DNI y la placa sean correctos.';
+          } else if (error.message.includes('500')) {
+            errorMessage = 'Error en el servidor. Por favor, intenta más tarde.';
+          } else {
+            errorMessage = error.message;
+          }
+        }
+        
+        toast.error(errorMessage, {
+          duration: 5000,
+        });
       } finally {
         setIsSearching(false);
       }

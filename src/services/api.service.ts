@@ -94,7 +94,7 @@ async function fetchAPI<T>(url: string, options?: RequestInit): Promise<T> {
         errorData = { message: errorText };
       }
       
-      throw new Error(errorData.message || errorData.error || `Error HTTP: ${response.status}`);
+      throw new Error(errorData.mensaje || errorData.message || errorData.error || `Error HTTP: ${response.status}`);
     }
 
     // Intentar parsear como JSON, si falla, usar texto plano

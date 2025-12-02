@@ -42,9 +42,9 @@ export function RescheduleAppointment({
   onNewSearch,
   appointmentData,
 }: RescheduleAppointmentProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9, 1)); // Octubre 2025
-  const [selectedDate, setSelectedDate] = useState<number | null>(21);
-  const [selectedTime, setSelectedTime] = useState<string | null>('07:00');
+  const [currentMonth, setCurrentMonth] = useState(new Date()); // Mes actual
+  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'reschedule' | 'cancel'>('reschedule');
   const [isRescheduling, setIsRescheduling] = useState(false);
 
