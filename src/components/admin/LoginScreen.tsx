@@ -34,8 +34,8 @@ export function LoginScreen({ onLoginSuccess, onRegisterClick }: LoginScreenProp
         setShowSuccess(true);
         setTimeout(() => {
           onLoginSuccess({
-            name: 'Maria Gómez',
-            email: credentials.email,
+            name: response.user?.nombre || 'TallerPro',
+            email: response.user?.email || credentials.email,
             role: 'Administrador',
           });
         }, 1500);

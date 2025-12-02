@@ -203,10 +203,16 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
     setValidationErrors(errors);
 
     if (Object.keys(errors).length === 0) {
+      // Obtener los nombres de marca y modelo desde los arrays cargados
+      const marcaSeleccionada = marcas.find(m => m.id.toString() === vehicleData.brand);
+      const modeloSeleccionado = modelos.find(m => m.id.toString() === vehicleData.model);
+      
       // Preparar datos formateados para pasar a App.tsx
       const formattedVehicleData = {
         ...vehicleData,
         service: services.find(s => s.value === vehicleData.service)?.label || vehicleData.service,
+        brandName: marcaSeleccionada?.nombre || vehicleData.brand, // Agregar nombre de marca
+        modelName: modeloSeleccionado?.nombre || vehicleData.model, // Agregar nombre de modelo
       };
       
       const formattedAppointmentData = {

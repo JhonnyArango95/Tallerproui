@@ -7,11 +7,13 @@ import {
   FileText, 
   Users,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  History
 } from 'lucide-react';
 import { UserManagement } from './UserManagement';
 import { ServiceManagement } from './ServiceManagement';
 import { AppointmentManagement } from './AppointmentManagement';
+import { AllAppointmentsManagement } from './AllAppointmentsManagement';
 import Reports from './Reports';
 
 interface AdminDashboardProps {
@@ -30,7 +32,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
 
   const menuItems = [
     { id: 'citas' as MenuItem, label: 'Citas', icon: Calendar },
-    { id: 'tecnicos' as MenuItem, label: 'Técnicos', icon: Wrench },
+    { id: 'tecnicos' as MenuItem, label: 'Historial', icon: History },
     { id: 'servicios' as MenuItem, label: 'Servicios', icon: Settings },
     { id: 'reportes' as MenuItem, label: 'Reportes', icon: FileText },
     { id: 'usuarios' as MenuItem, label: 'Usuarios', icon: Users },
@@ -52,7 +54,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
             <div className="w-8 h-8 bg-white rounded flex items-center justify-center">
               <Wrench className="w-5 h-5 text-[#1e293b]" />
             </div>
-            <span className="text-xl">AutoTaller</span>
+            <span className="text-xl">TallerPro</span>
           </div>
         </div>
 
@@ -111,7 +113,9 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
             <div>
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                 <span>Buscar en:</span>
-                <span className="text-gray-700 capitalize">{activeMenu}</span>
+                <span className="text-gray-700 capitalize">
+                  {activeMenu === 'tecnicos' ? 'Historial' : activeMenu}
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -119,14 +123,14 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
                 {activeMenu === 'usuarios' && 'Gestión de usuarios'}
                 {activeMenu === 'servicios' && 'Gestión de servicios'}
                 {activeMenu === 'citas' && 'Gestión de citas'}
-                {activeMenu === 'tecnicos' && 'Gestión de técnicos'}
+                {activeMenu === 'tecnicos' && 'Historial de citas'}
                 {activeMenu === 'reportes' && 'Reportes y estadísticas'}
               </span>
               <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                 {activeMenu === 'usuarios' && <Users className="w-5 h-5 text-gray-600" />}
                 {activeMenu === 'servicios' && <Settings className="w-5 h-5 text-gray-600" />}
                 {activeMenu === 'citas' && <Calendar className="w-5 h-5 text-gray-600" />}
-                {activeMenu === 'tecnicos' && <Wrench className="w-5 h-5 text-gray-600" />}
+                {activeMenu === 'tecnicos' && <History className="w-5 h-5 text-gray-600" />}
                 {activeMenu === 'reportes' && <FileText className="w-5 h-5 text-gray-600" />}
               </div>
             </div>
@@ -150,15 +154,7 @@ export function AdminDashboard({ user, onLogout }: AdminDashboardProps) {
               <AppointmentManagement />
             </div>
           )}
-          {activeMenu === 'tecnicos' && (
-            <div className="h-full overflow-auto p-8">
-              <div className="text-center py-20">
-                <Wrench className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-gray-900 mb-2">Técnicos</h3>
-                <p className="text-gray-600">Gestión de técnicos en desarrollo</p>
-              </div>
-            </div>
-          )}
+          {activeMenu === 'tecnicos' && <AllAppointmentsManagement />}
           {activeMenu === 'reportes' && <Reports />}
         </div>
       </div>

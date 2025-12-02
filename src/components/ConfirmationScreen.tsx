@@ -78,8 +78,8 @@ export function ConfirmationScreen({
   };
 
   const serviceName = serviceLabels[vehicleData.service] || vehicleData.service;
-  const brandName = brandLabels[vehicleData.brand] || vehicleData.brand;
-  const modelName = modelLabels[vehicleData.model] || vehicleData.model;
+  const brandName = brandLabels[vehicleData.brand] || vehicleData.brandName || vehicleData.brand;
+  const modelName = modelLabels[vehicleData.model] || vehicleData.modelName || vehicleData.model;
 
   // Datos mock del local (en producción vendrían del backend)
   const locationDetails = {

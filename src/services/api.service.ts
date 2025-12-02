@@ -306,3 +306,15 @@ export const serviciosService = {
     });
   },
 };
+
+// Servicios para gestión de citas (Admin)
+export const citasAdminService = {
+  // Listar todas las citas
+  listarTodasCitas: async (): Promise<any[]> => {
+    const url = `${API_CONFIG.ADMIN_BASE_URL}/citas`;
+    console.log('📦 Obteniendo todas las citas desde:', url);
+    return await fetchAPI<any[]>(url, {
+      method: 'GET', // Cambiar a GET
+    });
+  },
+};
