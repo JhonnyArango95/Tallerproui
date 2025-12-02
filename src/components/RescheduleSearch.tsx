@@ -5,6 +5,9 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Checkbox } from './ui/checkbox';
 import { AlertCircle } from 'lucide-react';
+import { citasService } from '../services/api.service';
+import type { CitaResponse } from '../config/api';
+import { toast } from 'sonner@2.0.3';
 
 interface RescheduleSearchProps {
   onBack: () => void;
@@ -20,8 +23,9 @@ export function RescheduleSearch({ onBack, onSearchSuccess }: RescheduleSearchPr
   });
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isSearching, setIsSearching] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     const errors: Record<string, string> = {};
 
     if (!searchData.documentNumber) {
@@ -41,17 +45,58 @@ export function RescheduleSearch({ onBack, onSearchSuccess }: RescheduleSearchPr
     setValidationErrors(errors);
 
     if (Object.keys(errors).length === 0) {
-      // Simular búsqueda exitosa con datos mock
-      const mockAppointment = {
-        location: 'Taller Central - Av. Siempre Viva 123',
-        date: 'Jueves 24/10/2025 - 10:40',
-        service: 'Mantenimiento Preventivo',
-        plate: searchData.plate || 'Sin placa',
-        documentNumber: searchData.documentNumber,
-      };
+      setIsSearching(true);
       
-      console.log('Buscando cita con:', searchData);
-      onSearchSuccess(mockAppointment);
+      try {
+        // Preparar datos para enviar a la API
+        const busquedaRequest = {
+          tipoDocumento: searchData.documentType,
+          numeroDocumento: searchData.documentNumber,
+          placa: searchData.noPlate ? null : searchData.plate,
+          sinPlaca: searchData.noPlate,
+        };
+
+        console.log('Buscando cita con:', busquedaRequest);
+        
+        // Llamar a la API
+        const citaEncontrada: CitaResponse = await citasService.buscarCita(busquedaRequest);
+        
+        console.log('========== CITA ENCONTRADA ==========');
+        console.log('📦 Respuesta completa del backend:', citaEncontrada);
+        console.log('🏢 Local:', citaEncontrada.localAtencion);
+        console.log('📅 Fecha:', citaEncontrada.fechaCita);
+        console.log('🕐 Hora:', citaEncontrada.horaCita);
+        console.log('🚗 Placa:', citaEncontrada.placa);
+        console.log('🎯 Servicio:', citaEncontrada.tipoServicio);
+        console.log('🆔 ID de la cita:', citaEncontrada.id);
+        toast.success('¡Cita encontrada!');
+        
+        // El backend devuelve los campos con nombres específicos
+        const rawResponse: any = citaEncontrada;
+        
+        const appointmentData = {
+          id: rawResponse.id,
+          location: rawResponse.localAtencion || 'Local no especificado',
+          date: rawResponse.fechaCita && rawResponse.horaCita
+            ? `${rawResponse.fechaCita} - ${rawResponse.horaCita}` 
+            : 'Fecha no especificada',
+          service: rawResponse.tipoServicio || 'Servicio no especificado',
+          plate: rawResponse.placa || 'Sin placa',
+          documentNumber: rawResponse.cliente?.numeroDocumento || rawResponse.numeroDocumento,
+          // Mantener todos los datos originales para operaciones posteriores
+          rawData: citaEncontrada,
+        };
+        
+        console.log('📋 Datos transformados para mostrar:', appointmentData);
+        
+        onSearchSuccess(appointmentData);
+        
+      } catch (error) {
+        console.error('Error al buscar la cita:', error);
+        toast.error(error instanceof Error ? error.message : 'No se encontró la cita. Verifica los datos e intenta de nuevo.');
+      } finally {
+        setIsSearching(false);
+      }
     }
   };
 
@@ -224,8 +269,9 @@ export function RescheduleSearch({ onBack, onSearchSuccess }: RescheduleSearchPr
               <Button
                 onClick={handleSearch}
                 className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white"
+                disabled={isSearching}
               >
-                BUSCAR
+                {isSearching ? 'BUSCANDO...' : 'BUSCAR'}
               </Button>
 
               {/* Exit Link */}

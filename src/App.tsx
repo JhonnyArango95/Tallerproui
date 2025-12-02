@@ -13,7 +13,10 @@ import { RescheduleManage } from './components/RescheduleManage';
 import { RescheduleAppointment } from './components/RescheduleAppointment';
 import { SuccessScreen } from './components/SuccessScreen';
 import { LoginScreen } from './components/admin/LoginScreen';
+import { RegisterScreen } from './components/admin/RegisterScreen';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { citasService } from './services/api.service';
+import { toast } from 'sonner@2.0.3';
 
 // --- Constantes de la API ---
 const API_TOKEN = 'c16e2bb53733fbfef5a0a9f69fde50c70410a13a0363accb46404b06083e1391';
@@ -55,6 +58,7 @@ export default function App() {
 
   // Estados para el panel de administración
   const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [showAdminRegister, setShowAdminRegister] = useState(false);
   const [adminUser, setAdminUser] = useState<any>(null);
   const [isAdminMode, setIsAdminMode] = useState(false);
 
@@ -174,11 +178,62 @@ export default function App() {
     }
   };
 
-  const handleConfirmAppointment = (vehicle: any, appointment: any) => {
-    setVehicleData(vehicle);
-    setAppointmentData(appointment);
-    setShowConfirmation(true);
-    console.log('Cita confirmada:', { userData: formData, vehicle, appointment });
+  const handleConfirmAppointment = async (vehicle: any, appointment: any) => {
+    console.log('========== CREANDO CITA EN APP.TSX ==========');
+    console.log('📋 Datos del usuario:', formData);
+    console.log('🚗 Datos del vehículo:', vehicle);
+    console.log('📅 Datos de la cita:', appointment);
+    
+    try {
+      // Preparar datos para enviar a la API
+      const citaRequest = {
+        // Datos del usuario
+        tipoDocumento: formData.documentType,
+        numeroDocumento: formData.documentNumber,
+        nombre: formData.firstName,
+        apellido: formData.lastName,
+        correo: formData.email,
+        celular: formData.phone,
+        aceptaTerminos: formData.termsAccepted,
+        aceptaNovedades: formData.infoAccepted,
+        
+        // Datos del vehículo
+        tipoVehiculo: vehicle.vehicleType === 'auto' ? 'Auto' : 'Camión',
+        placa: vehicle.plate || null,
+        marcaId: parseInt(vehicle.brand),
+        modeloId: parseInt(vehicle.model),
+        anio: parseInt(vehicle.year),
+        version: vehicle.version || null,
+        
+        // Datos de la cita
+        fecha: appointment.date,
+        hora: appointment.time,
+        tipoServicio: vehicle.service,
+        local: appointment.location,
+      };
+
+      console.log('📤 Enviando al backend:', JSON.stringify(citaRequest, null, 2));
+      console.log('🌐 URL:', 'http://localhost:8080/tallerpro-api-pe-1.0.0/api/v1/citas');
+      
+      // Llamar a la API
+      const response = await citasService.crearCita(citaRequest);
+      
+      console.log('✅ ¡CITA GUARDADA EN LA BASE DE DATOS!');
+      console.log('📦 Respuesta del backend:', response);
+      
+      toast.success('¡Cita creada y guardada exitosamente!');
+      
+      // Solo mostrar pantalla de confirmación si se guardó correctamente
+      setVehicleData(vehicle);
+      setAppointmentData(appointment);
+      setShowConfirmation(true);
+      
+    } catch (error) {
+      console.error('❌❌❌ ERROR AL GUARDAR LA CITA ❌❌❌');
+      console.error('Error completo:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al crear la cita. Por favor, intenta de nuevo.');
+      // NO mostrar pantalla de confirmación si hubo error
+    }
   };
 
   const handleBackToHome = () => {
@@ -283,14 +338,45 @@ export default function App() {
     setShowAdminLogin(false);
   };
 
+  const handleAdminRegister = () => {
+    setShowAdminLogin(false);
+    setShowAdminRegister(true);
+  };
+
+  const handleAdminRegisterSuccess = () => {
+    // Después del registro exitoso, volver al login
+    setShowAdminRegister(false);
+    setShowAdminLogin(true);
+  };
+
+  const handleBackToLogin = () => {
+    setShowAdminRegister(false);
+    setShowAdminLogin(true);
+  };
+
   // Si isAdminMode es true, mostrar el dashboard de admin
   if (isAdminMode && adminUser) {
     return <AdminDashboard user={adminUser} onLogout={handleAdminLogout} />;
   }
 
+  // Si showAdminRegister es true, mostrar la pantalla de registro
+  if (showAdminRegister) {
+    return (
+      <RegisterScreen
+        onRegisterSuccess={handleAdminRegisterSuccess}
+        onBackToLogin={handleBackToLogin}
+      />
+    );
+  }
+
   // Si showAdminLogin es true, mostrar la pantalla de login
   if (showAdminLogin) {
-    return <LoginScreen onLoginSuccess={handleAdminLoginSuccess} />;
+    return (
+      <LoginScreen
+        onLoginSuccess={handleAdminLoginSuccess}
+        onRegisterClick={handleAdminRegister}
+      />
+    );
   }
 
   // Si showRescheduleSuccess es true, mostrar la pantalla de éxito
@@ -372,6 +458,7 @@ export default function App() {
           lastName: formData.lastName,
           email: formData.email,
           phone: formData.phone,
+          infoAccepted: formData.infoAccepted,
         }}
       />
     );

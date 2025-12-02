@@ -3,6 +3,8 @@ import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { AlertCircle } from 'lucide-react';
 import { CancelAppointmentConfirmation } from './CancelAppointmentConfirmation';
+import { citasService } from '../services/api.service';
+import { toast } from 'sonner@2.0.3';
 
 interface RescheduleManageProps {
   onBack: () => void;
@@ -10,11 +12,13 @@ interface RescheduleManageProps {
   onCancel: () => void;
   onNewSearch: () => void;
   appointmentData: {
+    id?: number; // ID de la cita desde la API
     location: string;
     date: string;
     service: string;
     plate: string;
     documentNumber: string;
+    rawData?: any; // Datos completos de la API
   };
 }
 
@@ -26,6 +30,7 @@ export function RescheduleManage({
   appointmentData,
 }: RescheduleManageProps) {
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleReschedule = () => {
     console.log('Reagendando cita:', appointmentData);
@@ -36,10 +41,32 @@ export function RescheduleManage({
     setShowCancelModal(true);
   };
 
-  const handleCancelConfirm = () => {
-    console.log('Anulando cita:', appointmentData);
-    setShowCancelModal(false);
-    onCancel();
+  const handleCancelConfirm = async () => {
+    if (!appointmentData.id) {
+      toast.error('No se puede anular la cita. ID no encontrado.');
+      return;
+    }
+
+    setIsCancelling(true);
+    
+    try {
+      console.log('Anulando cita con ID:', appointmentData.id);
+      
+      // Llamar a la API para anular la cita
+      await citasService.anularCita(appointmentData.id);
+      
+      console.log('Cita anulada exitosamente');
+      toast.success('¡Cita anulada exitosamente!');
+      
+      setShowCancelModal(false);
+      onCancel();
+      
+    } catch (error) {
+      console.error('Error al anular la cita:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al anular la cita. Por favor, intenta de nuevo.');
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   const handleCancelModalReschedule = () => {

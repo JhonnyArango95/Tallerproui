@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ChevronLeft, ChevronRight, Car, Truck } from 'lucide-react';
 import { BrandLogos } from './BrandLogos';
+import { marcasService } from '../services/api.service';
+import type { Marca, Modelo } from '../config/api';
+import { toast } from 'sonner@2.0.3';
 
 interface VehicleAppointmentProps {
   onBack: () => void;
@@ -16,6 +19,7 @@ interface VehicleAppointmentProps {
     lastName: string;
     email: string;
     phone: string;
+    infoAccepted: boolean;
   };
 }
 
@@ -39,6 +43,59 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [currentMonth, setCurrentMonth] = useState(new Date(2025, 9)); // Octubre 2025
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  
+  // Estados para datos de la API
+  const [marcas, setMarcas] = useState<Marca[]>([]);
+  const [modelos, setModelos] = useState<Modelo[]>([]);
+  const [loadingMarcas, setLoadingMarcas] = useState(false);
+  const [loadingModelos, setLoadingModelos] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Cargar marcas al iniciar el componente
+  useEffect(() => {
+    const cargarMarcas = async () => {
+      setLoadingMarcas(true);
+      try {
+        const marcasData = await marcasService.listarMarcas();
+        setMarcas(marcasData);
+      } catch (error) {
+        console.error('Error al cargar marcas:', error);
+        toast.error('Error al cargar las marcas. Por favor, intenta de nuevo.');
+      } finally {
+        setLoadingMarcas(false);
+      }
+    };
+
+    cargarMarcas();
+  }, []);
+
+  // Cargar modelos cuando se selecciona una marca
+  useEffect(() => {
+    if (vehicleData.brand) {
+      const cargarModelos = async () => {
+        setLoadingModelos(true);
+        try {
+          const marcaSeleccionada = marcas.find(m => m.id.toString() === vehicleData.brand);
+          if (marcaSeleccionada) {
+            const modelosData = await marcasService.listarModelos(marcaSeleccionada.id);
+            setModelos(modelosData);
+          }
+        } catch (error) {
+          console.error('Error al cargar modelos:', error);
+          toast.error('Error al cargar los modelos. Por favor, intenta de nuevo.');
+          setModelos([]);
+        } finally {
+          setLoadingModelos(false);
+        }
+      };
+
+      cargarModelos();
+      // Resetear modelo seleccionado cuando cambie la marca
+      setVehicleData(prev => ({ ...prev, model: '' }));
+    } else {
+      setModelos([]);
+    }
+  }, [vehicleData.brand, marcas]);
 
   const services = [
     { value: 'preventivo', label: 'Preventivo' },
@@ -49,62 +106,18 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
 
   const years = Array.from({ length: 30 }, (_, i) => (new Date().getFullYear() - i).toString());
 
-  const brands = [
-    { value: 'nissan', label: 'Nissan' },
-    { value: 'honda', label: 'Honda' },
-    { value: 'chevrolet', label: 'Chevrolet' },
-    { value: 'subaru', label: 'Subaru' },
-    { value: 'toyota', label: 'Toyota' },
-    { value: 'hyundai', label: 'Hyundai' },
-    { value: 'renault', label: 'Renault' },
-    { value: 'kia', label: 'KIA' },
-  ];
-
-  // Modelos según la marca (datos mock)
-  const modelsByBrand: Record<string, { value: string; label: string }[]> = {
-    nissan: [
-      { value: 'versa', label: 'Versa' },
-      { value: 'sentra', label: 'Sentra' },
-      { value: 'kicks', label: 'Kicks' },
-      { value: 'xtrail', label: 'X-Trail' },
-    ],
-    honda: [
-      { value: 'civic', label: 'Civic' },
-      { value: 'accord', label: 'Accord' },
-      { value: 'crv', label: 'CR-V' },
-      { value: 'hrv', label: 'HR-V' },
-    ],
-    toyota: [
-      { value: 'corolla', label: 'Corolla' },
-      { value: 'yaris', label: 'Yaris' },
-      { value: 'rav4', label: 'RAV4' },
-      { value: 'hilux', label: 'Hilux' },
-    ],
-    chevrolet: [
-      { value: 'spark', label: 'Spark' },
-      { value: 'sail', label: 'Sail' },
-      { value: 'cruze', label: 'Cruze' },
-      { value: 'tracker', label: 'Tracker' },
-    ],
-    hyundai: [
-      { value: 'accent', label: 'Accent' },
-      { value: 'elantra', label: 'Elantra' },
-      { value: 'tucson', label: 'Tucson' },
-      { value: 'santafe', label: 'Santa Fe' },
-    ],
-  };
-
-  const availableModels = vehicleData.brand ? modelsByBrand[vehicleData.brand] || [] : [];
+  // Eliminar los datos mock de brands y modelsByBrand
+  // Ya no se usan porque ahora vienen de la API
 
   const timeSlots = [
     { time: '07:00', available: true },
     { time: '07:20', available: true },
-    { time: '07:40', available: false },
+    { time: '07:40', available: true },
     { time: '08:00', available: true },
     { time: '08:20', available: true },
     { time: '08:40', available: true },
     { time: '09:00', available: true },
-    { time: '09:20', available: false },
+    { time: '09:20', available: true },
   ];
 
   const getDaysInMonth = (date: Date) => {
@@ -121,16 +134,22 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
   const handleDateSelect = (day: number) => {
     const selected = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
     setSelectedDate(selected);
+    
+    // Formatear fecha como YYYY-MM-DD para la API
+    const year = selected.getFullYear();
+    const month = String(selected.getMonth() + 1).padStart(2, '0');
+    const dayStr = String(selected.getDate()).padStart(2, '0');
+    
     setAppointmentData((prev) => ({
       ...prev,
-      date: selected.toLocaleDateString('es-PE'),
+      date: `${year}-${month}-${dayStr}`,
     }));
   };
 
   const handleTimeSelect = (time: string) => {
     setAppointmentData((prev) => ({
       ...prev,
-      time,
+      time: time, // Guardar solo HH:mm, los segundos se agregarán al enviar
     }));
   };
 
@@ -142,7 +161,7 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const errors: Record<string, string> = {};
 
     if (!vehicleData.vehicleType) {
@@ -173,12 +192,23 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
     setValidationErrors(errors);
 
     if (Object.keys(errors).length === 0) {
-      console.log('Reservation confirmed:', {
-        userData,
-        vehicleData,
-        appointmentData,
-      });
-      onConfirm(vehicleData, appointmentData);
+      // Preparar datos formateados para pasar a App.tsx
+      const formattedVehicleData = {
+        ...vehicleData,
+        service: services.find(s => s.value === vehicleData.service)?.label || vehicleData.service,
+      };
+      
+      const formattedAppointmentData = {
+        ...appointmentData,
+        time: `${appointmentData.time}:00`, // Agregar segundos al formato HH:mm:ss
+      };
+      
+      console.log('📋 VehicleAppointment: Pasando datos a App.tsx...');
+      console.log('🚗 Vehicle:', formattedVehicleData);
+      console.log('📅 Appointment:', formattedAppointmentData);
+      
+      // Pasar los datos a App.tsx que hará la llamada a la API
+      onConfirm(formattedVehicleData, formattedAppointmentData);
     }
   };
 
@@ -301,11 +331,17 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
                     <SelectValue placeholder="Selecciona marca" />
                   </SelectTrigger>
                   <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand.value} value={brand.value}>
-                        {brand.label}
+                    {loadingMarcas ? (
+                      <SelectItem value="loading" disabled>
+                        Cargando marcas...
                       </SelectItem>
-                    ))}
+                    ) : (
+                      marcas.map((brand) => (
+                        <SelectItem key={brand.id.toString()} value={brand.id.toString()}>
+                          {brand.nombre}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 {validationErrors.brand && (
@@ -329,16 +365,22 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
                     <SelectValue placeholder="Selecciona modelo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableModels.length > 0 ? (
-                      availableModels.map((model) => (
-                        <SelectItem key={model.value} value={model.value}>
-                          {model.label}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="none" disabled>
-                        Primero selecciona una marca
+                    {loadingModelos ? (
+                      <SelectItem value="loading" disabled>
+                        Cargando modelos...
                       </SelectItem>
+                    ) : (
+                      modelos.length > 0 ? (
+                        modelos.map((model) => (
+                          <SelectItem key={model.id.toString()} value={model.id.toString()}>
+                            {model.nombre}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="none" disabled>
+                          Primero selecciona una marca
+                        </SelectItem>
+                      )
                     )}
                   </SelectContent>
                 </Select>
@@ -519,8 +561,9 @@ export function VehicleAppointment({ onBack, onConfirm, userData }: VehicleAppoi
               <Button
                 onClick={handleConfirm}
                 className="flex-1 bg-[#ff9800] hover:bg-[#f57c00] text-white"
+                disabled={isSubmitting}
               >
-                CONFIRMAR CITA
+                {isSubmitting ? 'CONFIRMANDO...' : 'CONFIRMAR CITA'}
               </Button>
               <Button
                 type="button"

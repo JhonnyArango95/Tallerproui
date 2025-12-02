@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Wrench, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Wrench, AlertCircle, CheckCircle2, Loader2, Eye, EyeOff } from 'lucide-react';
+import { authService } from '../../services/api.service';
+import { toast } from 'sonner@2.0.3';
 
 interface LoginScreenProps {
   onLoginSuccess: (user: any) => void;
+  onRegisterClick: () => void;
 }
 
-export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
+export function LoginScreen({ onLoginSuccess, onRegisterClick }: LoginScreenProps) {
   const [credentials, setCredentials] = useState({
     email: '',
     password: '',
@@ -17,12 +20,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [showError, setShowError] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Credenciales mock
-  const MOCK_CREDENTIALS = {
-    email: 'tallerpro.com',
-    password: '********',
-  };
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,11 +29,8 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     setIsLoading(true);
 
     // Simular petición al servidor
-    setTimeout(() => {
-      if (
-        credentials.email === MOCK_CREDENTIALS.email &&
-        credentials.password === MOCK_CREDENTIALS.password
-      ) {
+    authService.login(credentials)
+      .then(response => {
         setShowSuccess(true);
         setTimeout(() => {
           onLoginSuccess({
@@ -44,11 +39,12 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             role: 'Administrador',
           });
         }, 1500);
-      } else {
+      })
+      .catch(error => {
         setShowError(true);
         setIsLoading(false);
-      }
-    }, 800);
+        toast.error('Credenciales incorrectas');
+      });
   };
 
   return (
@@ -127,18 +123,27 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             <Label htmlFor="password" className="text-gray-700 mb-2 block">
               Contraseña
             </Label>
-            <Input
-              id="password"
-              type="password"
-              value={credentials.password}
-              onChange={(e) => {
-                setCredentials({ ...credentials, password: e.target.value });
-                setShowError(false);
-              }}
-              className="bg-white border-gray-300"
-              placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                value={credentials.password}
+                onChange={(e) => {
+                  setCredentials({ ...credentials, password: e.target.value });
+                  setShowError(false);
+                }}
+                className="bg-white border-gray-300"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           {/* Links */}
@@ -158,7 +163,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             disabled={isLoading}
           >
-            {isLoading ? 'Verificando...' : 'Entrar'}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Entrar'}
           </Button>
 
           {/* Help Link */}
@@ -169,6 +174,17 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             </a>
           </div>
         </form>
+
+        {/* Register Link */}
+        <div className="text-center mt-4">
+          <button
+            type="button"
+            onClick={onRegisterClick}
+            className="text-sm text-blue-600 hover:text-blue-700 underline"
+          >
+            ¿No tienes una cuenta? Regístrate
+          </button>
+        </div>
       </div>
     </div>
   );

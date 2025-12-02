@@ -82,7 +82,7 @@ export function UserManagement() {
     email: '',
     phone: '',
     role: '',
-    administrator: '',    // Esto es el estado (activo/inactivo)
+    administrator: '',    
     password: '',
     confirmPassword: '',
   });

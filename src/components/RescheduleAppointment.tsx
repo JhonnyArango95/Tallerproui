@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { citasService } from '../services/api.service';
+import { toast } from 'sonner@2.0.3';
 
 interface RescheduleAppointmentProps {
   onBack: () => void;
@@ -9,11 +11,13 @@ interface RescheduleAppointmentProps {
   onCancel: () => void;
   onNewSearch: () => void;
   appointmentData: {
+    id?: number; // ID de la cita desde la API
     location: string;
     date: string;
     service: string;
     plate: string;
     documentNumber: string;
+    rawData?: any; // Datos completos de la API
   };
 }
 
@@ -42,6 +46,7 @@ export function RescheduleAppointment({
   const [selectedDate, setSelectedDate] = useState<number | null>(21);
   const [selectedTime, setSelectedTime] = useState<string | null>('07:00');
   const [activeTab, setActiveTab] = useState<'reschedule' | 'cancel'>('reschedule');
+  const [isRescheduling, setIsRescheduling] = useState(false);
 
   const daysOfWeek = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
   
@@ -79,11 +84,53 @@ export function RescheduleAppointment({
     setSelectedTime(time);
   };
 
-  const handleConfirmReschedule = () => {
-    if (selectedDate && selectedTime) {
+  const handleConfirmReschedule = async () => {
+    if (!selectedDate || !selectedTime) {
+      toast.error('Por favor selecciona una fecha y hora');
+      return;
+    }
+
+    if (!appointmentData.id) {
+      toast.error('No se puede reagendar la cita. ID no encontrado.');
+      return;
+    }
+
+    setIsRescheduling(true);
+
+    try {
+      // Formatear fecha como YYYY-MM-DD para la API
+      const year = currentMonth.getFullYear();
+      const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate).padStart(2, '0');
+      const fechaFormateada = `${year}-${month}-${day}`;
+      
+      // El tiempo ya viene en formato HH:mm desde mockTimeSlots
+      const horaFormateada = selectedTime;
+
+      console.log('Reagendando cita con ID:', appointmentData.id);
+      console.log('Nueva fecha:', fechaFormateada);
+      console.log('Nueva hora:', horaFormateada);
+
+      // Llamar a la API
+      const response = await citasService.reagendarCita(appointmentData.id, {
+        fecha: fechaFormateada,
+        hora: horaFormateada,
+      });
+
+      console.log('Cita reagendada exitosamente:', response);
+      toast.success('¡Cita reagendada exitosamente!');
+
+      // Formatear la fecha para mostrar en el componente de confirmación
       const monthName = currentMonth.toLocaleDateString('es-ES', { month: 'long' });
       const newDate = `${selectedDate} de ${monthName} de ${currentMonth.getFullYear()}`;
+      
       onConfirm(newDate, selectedTime);
+
+    } catch (error) {
+      console.error('Error al reagendar la cita:', error);
+      toast.error(error instanceof Error ? error.message : 'Error al reagendar la cita. Por favor, intenta de nuevo.');
+    } finally {
+      setIsRescheduling(false);
     }
   };
 
@@ -274,7 +321,7 @@ export function RescheduleAppointment({
                 {/* Confirm Button */}
                 <Button
                   onClick={handleConfirmReschedule}
-                  disabled={!selectedDate || !selectedTime}
+                  disabled={!selectedDate || !selectedTime || isRescheduling}
                   className="w-full bg-[#f59e0b] hover:bg-[#d97706] text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   CONFIRMAR REAGENDA
