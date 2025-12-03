@@ -212,8 +212,31 @@ export function AllAppointmentsManagement() {
   };
 
   return (
-    <div className="flex-1 overflow-auto">
-      <div className="p-8">
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-8" style={{
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#888 #f1f1f1',
+      }}>
+        <style jsx>{`
+          div::-webkit-scrollbar {
+            width: 12px;
+          }
+          
+          div::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+          }
+          
+          div::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+          }
+          
+          div::-webkit-scrollbar-thumb:hover {
+            background: #555;
+          }
+        `}</style>
+        
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-gray-900 mb-2">Historial de Citas</h2>
