@@ -41,17 +41,17 @@ export function AppointmentManagement() {
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [loading, setLoading] = useState(false);
-  
+
   // Estados para DNI/RENIEC
   const [isLoadingDNI, setIsLoadingDNI] = useState(false);
   const [dniError, setDniError] = useState<string | null>(null);
   const [dataFromAPI, setDataFromAPI] = useState(false);
-  
+
   // Estados para validación
   const [showNumericError, setShowNumericError] = useState(false);
   const [showPhoneNumericError, setShowPhoneNumericError] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
+
   // Estados para mapeo de marcas y modelos
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [modelosPorMarca, setModelosPorMarca] = useState<Record<number, Modelo[]>>({});
@@ -137,7 +137,7 @@ export function AppointmentManagement() {
       if (!result.success || !result.data) {
         throw new Error(result.message || 'DNI no encontrado o error en la API');
       }
-      
+
       const apiData = result.data;
 
       setNewAppointmentForm((prev) => ({
@@ -145,10 +145,10 @@ export function AppointmentManagement() {
         nombre: apiData.nombres || '',
         apellido: `${apiData.apellido_paterno || ''} ${apiData.apellido_materno || ''}`.trim(),
       }));
-      
+
       setDataFromAPI(true);
       toast.success('¡DNI consultado exitosamente!');
-      
+
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors.nombre;
@@ -174,9 +174,9 @@ export function AppointmentManagement() {
 
   // Efecto para consultar DNI automáticamente cuando tenga 8 dígitos
   useEffect(() => {
-    if (view === 'new-appointment' && 
-        newAppointmentForm.tipoDocumento === 'DNI' && 
-        newAppointmentForm.numeroDocumento.length === 8) {
+    if (view === 'new-appointment' &&
+      newAppointmentForm.tipoDocumento === 'DNI' &&
+      newAppointmentForm.numeroDocumento.length === 8) {
       fetchDNIData(newAppointmentForm.numeroDocumento);
     } else {
       setDniError(null);
@@ -193,14 +193,14 @@ export function AppointmentManagement() {
     try {
       const marcasData = await marcasService.listarMarcas();
       setMarcas(marcasData);
-      
+
       const modelosMap: Record<number, Modelo[]> = {};
       for (const marca of marcasData) {
         const modelos = await marcasService.listarModelos(marca.id);
         modelosMap[marca.id] = modelos;
       }
       setModelosPorMarca(modelosMap);
-      
+
       console.log('✅ Marcas y modelos cargados correctamente');
     } catch (error) {
       console.error('Error al cargar marcas y modelos:', error);
@@ -271,7 +271,7 @@ export function AppointmentManagement() {
   // ========== REAGENDAR CITA ==========
   const handleConfirmReschedule = async () => {
     if (!foundCita) return;
-    
+
     if (!rescheduleForm.horaCita) {
       toast.error('Selecciona una hora para la cita');
       return;
@@ -281,17 +281,17 @@ export function AppointmentManagement() {
 
     try {
       const fechaFormateada = format(rescheduleForm.fechaCita, 'yyyy-MM-dd');
-      
+
       const request: ReagendarCitaRequest = {
         fecha: fechaFormateada,
         hora: rescheduleForm.horaCita,
       };
 
       await citasService.reagendarCita(foundCita.id, request);
-      
+
       toast.success('¡Cita reagendada exitosamente!');
       setShowRescheduleDialog(false);
-      
+
       // Recargar la cita actualizada
       const updatedCita = await citasService.buscarCita({
         tipoDocumento: 'DNI',
@@ -300,7 +300,7 @@ export function AppointmentManagement() {
         sinPlaca: false,
       });
       setFoundCita(updatedCita);
-      
+
     } catch (error) {
       console.error('Error al reagendar cita:', error);
       toast.error('Error al reagendar la cita');
@@ -317,10 +317,10 @@ export function AppointmentManagement() {
 
     try {
       await citasService.anularCita(foundCita.id);
-      
+
       toast.success('Cita anulada exitosamente');
       setShowCancelDialog(false);
-      
+
       // Recargar la cita actualizada
       const updatedCita = await citasService.buscarCita({
         tipoDocumento: 'DNI',
@@ -329,7 +329,7 @@ export function AppointmentManagement() {
         sinPlaca: false,
       });
       setFoundCita(updatedCita);
-      
+
     } catch (error) {
       console.error('Error al anular cita:', error);
       toast.error('Error al anular la cita');
@@ -416,7 +416,7 @@ export function AppointmentManagement() {
         celular: newAppointmentForm.celular,
         aceptaTerminos: newAppointmentForm.aceptaTerminos,
         aceptaNovedades: newAppointmentForm.aceptaNovedades,
-        
+
         // Datos del vehículo
         tipoVehiculo: newAppointmentForm.tipoVehiculo,
         placa: newAppointmentForm.placa || null,
@@ -424,7 +424,7 @@ export function AppointmentManagement() {
         modeloId: newAppointmentForm.modeloId,
         anio: newAppointmentForm.anio,
         version: newAppointmentForm.version || null,
-        
+
         // Datos de la cita
         fecha: fechaFormateada,
         hora: newAppointmentForm.hora,
@@ -435,16 +435,16 @@ export function AppointmentManagement() {
       console.log('📤 Enviando al backend:', JSON.stringify(citaRequest, null, 2));
 
       const response = await citasService.crearCita(citaRequest);
-      
+
       console.log('✅ ¡CITA CREADA EXITOSAMENTE!');
       console.log('📦 Respuesta del backend:', response);
-      
+
       toast.success('¡Cita creada y guardada exitosamente!');
-      
+
       // Resetear formulario y volver a la vista principal
       resetNewAppointmentForm();
       setView('main');
-      
+
     } catch (error) {
       console.error('❌ ERROR AL CREAR LA CITA:', error);
       toast.error(error instanceof Error ? error.message : 'Error al crear la cita');
@@ -497,7 +497,7 @@ export function AppointmentManagement() {
       COMPLETADA: { bg: 'bg-green-500', text: 'text-white', label: 'Completada' },
       CANCELADA: { bg: 'bg-red-500', text: 'text-white', label: 'Cancelada' },
     };
-    
+
     const badge = badges[estado] || { bg: 'bg-gray-500', text: 'text-white', label: estado };
     return (
       <Badge className={`${badge.bg} ${badge.text}`}>
@@ -513,8 +513,8 @@ export function AppointmentManagement() {
         <div>
           <h2 className="text-gray-900 mb-2">Gestión de Citas</h2>
           <p className="text-gray-600 text-sm">
-            {view === 'main' 
-              ? 'Busca, visualiza, reagenda o anula citas existentes' 
+            {view === 'main'
+              ? 'Busca, visualiza, reagenda o anula citas existentes'
               : 'Registra una nueva cita en el sistema'
             }
           </p>
@@ -555,7 +555,7 @@ export function AppointmentManagement() {
               <p className="text-sm text-gray-600 mb-4">
                 Ingresa el DNI del cliente y la placa del vehículo para buscar una cita
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-gray-700 mb-2 block">Número de Documento (DNI)</Label>
@@ -1162,28 +1162,27 @@ export function AppointmentManagement() {
                 </div>
 
                 {/* Fecha */}
+
+                {/* Fecha - Input Modificable */}
                 <div>
                   <Label className="text-gray-700 mb-2 block">Fecha *</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {format(newAppointmentForm.fecha, 'PPP', { locale: es })}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={newAppointmentForm.fecha}
-                        onSelect={(date) =>
-                          date && setNewAppointmentForm({ ...newAppointmentForm, fecha: date })
-                        }
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Input
+                    type="date"
+                    value={newAppointmentForm.fecha ? format(newAppointmentForm.fecha, 'yyyy-MM-dd') : ''}
+                    min={format(new Date(), 'yyyy-MM-dd')}
+                    onChange={(e) => {
+                      // Validamos que el input no esté vacío
+                      if (!e.target.value) return;
+
+                      // Dividimos el string para crear la fecha localmente y evitar errores de zona horaria
+                      const [year, month, day] = e.target.value.split('-').map(Number);
+                      const newDate = new Date(year, month - 1, day);
+
+                      setNewAppointmentForm({ ...newAppointmentForm, fecha: newDate });
+                    }}
+                  />
                 </div>
+
 
                 {/* Hora */}
                 <div>
@@ -1228,9 +1227,10 @@ export function AppointmentManagement() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="TALLER CENTRAL">Taller Central</SelectItem>
-                      <SelectItem value="SUCURSAL NORTE">Sucursal Norte</SelectItem>
-                      <SelectItem value="SUCURSAL SUR">Sucursal Sur</SelectItem>
+                      <SelectItem value="TALLER CENTRAL">Av. Aviación 1003, La Victoria</SelectItem>
+                      <SelectItem value="SUCURSAL NORTE">Av. Javier Prado Este 5268, La Molina</SelectItem>
+                      <SelectItem value="SUCURSAL SUR">Av. Universitaria 1801, San Miguel</SelectItem>
+                      <SelectItem value="SUCURSAL CENTRO">Av. Los Héroes 123, San Juan de Miraflores</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1252,7 +1252,7 @@ export function AppointmentManagement() {
               <Button
                 onClick={handleCreateAppointment}
                 disabled={loading}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                className="flex-1 bg-[#22c55e] hover:bg-[#16a34a] text-white shadow-md"
               >
                 {loading ? (
                   <>
@@ -1276,7 +1276,7 @@ export function AppointmentManagement() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-gray-900 mb-4">Reagendar Cita</h3>
-            
+
             <div className="space-y-4 mb-6">
               <div>
                 <Label className="text-gray-700 mb-2 block">Nueva Fecha</Label>
