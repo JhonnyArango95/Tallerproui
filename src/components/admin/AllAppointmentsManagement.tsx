@@ -43,7 +43,7 @@ export function AllAppointmentsManagement() {
   const [filterStatus, setFilterStatus] = useState('TODOS');
   const [selectedCita, setSelectedCita] = useState<Cita | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  
+
   // Estados para mapeo de marcas y modelos
   const [marcas, setMarcas] = useState<Marca[]>([]);
   const [modelosPorMarca, setModelosPorMarca] = useState<Record<number, Modelo[]>>({});
@@ -59,7 +59,7 @@ export function AllAppointmentsManagement() {
     try {
       const marcasData = await marcasService.listarMarcas();
       setMarcas(marcasData);
-      
+
       // Cargar todos los modelos de todas las marcas
       const modelosMap: Record<number, Modelo[]> = {};
       for (const marca of marcasData) {
@@ -67,7 +67,7 @@ export function AllAppointmentsManagement() {
         modelosMap[marca.id] = modelos;
       }
       setModelosPorMarca(modelosMap);
-      
+
       console.log('✅ Marcas y modelos cargados:', marcasData, modelosMap);
     } catch (error) {
       console.error('Error al cargar marcas y modelos:', error);
@@ -112,14 +112,14 @@ export function AllAppointmentsManagement() {
 
   // Filtrar citas por búsqueda y estado
   const citasFiltradas = citas.filter(cita => {
-    const matchSearch = 
+    const matchSearch =
       cita.cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cita.cliente.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cita.cliente.numeroDocumento.includes(searchTerm) ||
       cita.detalleVehiculo.placa.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchStatus = filterStatus === 'TODOS' || cita.estado === filterStatus;
-    
+
     return matchSearch && matchStatus;
   });
 
@@ -131,7 +131,7 @@ export function AllAppointmentsManagement() {
       CANCELADA: { bg: 'bg-red-100', text: 'text-red-800' },
       EN_PROCESO: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
     };
-    
+
     const badge = badges[estado] || { bg: 'bg-gray-100', text: 'text-gray-800' };
     return `${badge.bg} ${badge.text} px-3 py-1 rounded-full text-xs`;
   };
@@ -139,10 +139,10 @@ export function AllAppointmentsManagement() {
   // Formatear fecha
   const formatearFecha = (fecha: string): string => {
     const date = new Date(fecha);
-    return date.toLocaleDateString('es-ES', { 
-      day: '2-digit', 
-      month: 'short', 
-      year: 'numeric' 
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
     });
   };
 
@@ -160,7 +160,7 @@ export function AllAppointmentsManagement() {
     try {
       // Crear CSV en lugar de Excel (no requiere librerías externas)
       const headers = ['ID', 'Nombre', 'Apellido', 'Documento', 'Correo', 'Celular', 'Placa', 'Tipo Vehículo', 'Marca', 'Modelo', 'Año', 'Versión', 'Fecha Cita', 'Hora Cita', 'Servicio', 'Estado', 'Local Atención'];
-      
+
       const rows = citas.map(cita => [
         cita.id,
         cita.cliente.nombre,
@@ -180,30 +180,30 @@ export function AllAppointmentsManagement() {
         cita.estado,
         cita.localAtencion
       ]);
-      
+
       // Crear contenido CSV
       const csvContent = [
-        headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        headers.join(';'), // <--- CAMBIO AQUÍ: de ',' a ';'
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(';')) // <--- CAMBIO AQUÍ: de ',' a ';'
       ].join('\n');
-      
+
       // Crear Blob y descargar
       const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       // Generar nombre de archivo con fecha y hora
       const fecha = new Date().toISOString().split('T')[0];
       const hora = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
       const nombreArchivo = `citas_${fecha}_${hora}.csv`;
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', nombreArchivo);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       toast.success(`Archivo exportado correctamente: ${nombreArchivo}`);
     } catch (error) {
       console.error('Error al exportar archivo:', error);
@@ -236,7 +236,7 @@ export function AllAppointmentsManagement() {
             background: #555;
           }
         `}</style>
-        
+
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-gray-900 mb-2">Historial de Citas</h2>

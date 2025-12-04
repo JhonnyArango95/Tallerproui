@@ -1227,10 +1227,10 @@ export function AppointmentManagement() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="TALLER CENTRAL">Av. Aviación 1003, La Victoria</SelectItem>
-                      <SelectItem value="SUCURSAL NORTE">Av. Javier Prado Este 5268, La Molina</SelectItem>
-                      <SelectItem value="SUCURSAL SUR">Av. Universitaria 1801, San Miguel</SelectItem>
-                      <SelectItem value="SUCURSAL CENTRO">Av. Los Héroes 123, San Juan de Miraflores</SelectItem>
+                      <SelectItem value="Av. Aviación 1003, La Victoria">Av. Aviación 1003, La Victoria</SelectItem>
+                      <SelectItem value="Av. Javier Prado Este 5268, La Molina">Av. Javier Prado Este 5268, La Molina</SelectItem>
+                      <SelectItem value="Av. Universitaria 1801, San Miguel">Av. Universitaria 1801, San Miguel</SelectItem>
+                      <SelectItem value="Av. Los Héroes 123, San Juan de Miraflores">Av. Los Héroes 123, San Juan de Miraflores</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -1278,29 +1278,23 @@ export function AppointmentManagement() {
             <h3 className="text-gray-900 mb-4">Reagendar Cita</h3>
 
             <div className="space-y-4 mb-6">
+              {/* CAMPO DE FECHA (Nativo y modificable) */}
               <div>
                 <Label className="text-gray-700 mb-2 block">Nueva Fecha</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(rescheduleForm.fechaCita, 'PPP', { locale: es })}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={rescheduleForm.fechaCita}
-                      onSelect={(date) =>
-                        date && setRescheduleForm({ ...rescheduleForm, fechaCita: date })
-                      }
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Input
+                  type="date"
+                  value={rescheduleForm.fechaCita ? format(rescheduleForm.fechaCita, 'yyyy-MM-dd') : ''}
+                  min={format(new Date(), 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    if (!e.target.value) return;
+                    const [year, month, day] = e.target.value.split('-').map(Number);
+                    const newDate = new Date(year, month - 1, day);
+                    setRescheduleForm({ ...rescheduleForm, fechaCita: newDate });
+                  }}
+                />
               </div>
 
+              {/* CAMPO DE HORA */}
               <div>
                 <Label className="text-gray-700 mb-2 block">Nueva Hora</Label>
                 <Select
@@ -1323,6 +1317,7 @@ export function AppointmentManagement() {
               </div>
             </div>
 
+            {/* BOTONES DE ACCIÓN (Aquí está el verde que faltaba) */}
             <div className="flex gap-3">
               <Button
                 onClick={() => setShowRescheduleDialog(false)}
@@ -1332,10 +1327,11 @@ export function AppointmentManagement() {
               >
                 Cancelar
               </Button>
+
               <Button
                 onClick={handleConfirmReschedule}
                 disabled={loading}
-                className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
               >
                 {loading ? (
                   <>
