@@ -718,9 +718,9 @@ export function AppointmentManagement() {
                         });
                         setShowRescheduleDialog(true);
                       }}
-                      className="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white"
+                      className="flex-1"
                     >
-                      <RotateCcw className="w-4 h-4 mr-2" />
+                      <X className="w-4 h-4 mr-2" />
                       Reagendar
                     </Button>
                     <Button
@@ -1331,7 +1331,7 @@ export function AppointmentManagement() {
               <Button
                 onClick={handleConfirmReschedule}
                 disabled={loading}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                className="flex-1"
               >
                 {loading ? (
                   <>
