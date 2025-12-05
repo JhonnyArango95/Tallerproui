@@ -10,45 +10,7 @@ export default function Reports() {
   return (
     <div className="h-full bg-gray-50 overflow-auto flex flex-col">
       {/* Header - Navegación y Filtros */}
-      <div className="bg-white border-b px-8 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-              <span>Inicio</span>
-              <span>›</span>
-              <span className="text-gray-900">Reportes</span>
-            </div>
-            <h1 className="text-2xl text-gray-900">Reportes</h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <Select value={selectedWorkshop} onValueChange={setSelectedWorkshop}>
-              <SelectTrigger className="w-32 bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="taller-a">Taller A</SelectItem>
-                <SelectItem value="taller-b">Taller B</SelectItem>
-                <SelectItem value="taller-c">Taller C</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-40 bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7-dias">Últimos 7 días</SelectItem>
-                <SelectItem value="30-dias">Últimos 30 días</SelectItem>
-                <SelectItem value="90-dias">Últimos 90 días</SelectItem>
-                <SelectItem value="este-mes">Este mes</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              <Download className="w-4 h-4 mr-2" />
-              Exportar
-            </Button>
-          </div>
-        </div>
-      </div>
+      
 
       {/* Main Content - Power BI Completo */}
       <div className="p-8 flex-1 overflow-auto">
